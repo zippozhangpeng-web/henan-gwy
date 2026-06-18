@@ -175,4 +175,6 @@ if __name__ == '__main__':
     print(f"📡 访问地址: http://127.0.0.1:5000")
     print(f"📡 局域网地址: http://0.0.0.0:5000")
     print("=" * 60)
-    app.run(host='0.0.0.0', port=5050, debug=True)
+    debug = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+    port = int(os.getenv('PORT', '5050'))
+    app.run(host='0.0.0.0', port=port, debug=debug)

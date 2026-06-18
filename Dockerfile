@@ -26,6 +26,7 @@ RUN python seed_data.py
 
 # 暴露端口
 EXPOSE 5050
+EXPOSE 8080
 
 # 健康检查
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
