@@ -1,0 +1,14 @@
+# ==========================================
+# docker-compose.yml — 好风公考情报站
+# ==========================================
+version: '3.8'
+
+services:
+  web:
+    build: .
+    container_name: haofeng-gwy
+    ports:
+      - "5050:5050"
+    environment:
+      - TZ=Asia/Shanghai
+    restart: unless-stopped

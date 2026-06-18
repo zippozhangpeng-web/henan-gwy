@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+{% block title %}河南公考岗位情报站 - 首页{% endblock %}
+{% block content %}
+
+<!-- Hero -->
+<div class="hero-section">
+    <div class="container">
+        <h1><span class="gold-text">数据驱动</span> 科学选岗</h1>
+        <p>收录河南省近5年公务员考试岗位数据 · 四维雷达分析 · 上岸难度评估</p>
+    </div>
+</div>
+
+<!-- Stats -->
+<div class="container stats-row">
+    <div class="row g-3">
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">📋</div><div class="stat-number">{{ stats.total_positions }}</div>
+                <div class="stat-label">📋 收录岗位</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div><div class="stat-number">{{ stats.total_recruit }}</div>
+                <div class="stat-label">👥 招录人数</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">18</div>
+                <div class="stat-label">🏙️ 覆盖地市</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">5年</div>
+                <div class="stat-label">📅 数据年份</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Search Section -->
+<div class="container mt-5">
+    <div class="search-form fade-in-up">
+        <h4 class="mb-3" style="color: var(--primary);">
+            <i class="bi bi-search"></i> 岗位智能检索
+        </h4>
+        <form action="/search" method="GET">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">毕业年份</label>
+                    <select class="form-select" name="year">
+                        <option value="">全部年份</option>
+                        {% for y in years %}
+                        <option value="{{ y }}">{{ y }}年</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">专业</label>
+                    <input type="text" class="form-control" name="major" placeholder="如：法学、计算机...">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">学历</label>
+                    <select class="form-select" name="education">
+                        <option value="">不限</option>
+                        <option value="大专">大专及以上</option>
+                        <option value="本科">本科及以上</option>
+                        <option value="硕士">硕士研究生及以上</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">意向地市</label>
+                    <div class="d-flex flex-wrap gap-1" id="citySelector">
+                        {% for c in cities %}
+                        <span class="city-pill" data-city="{{ c.city }}">{{ c.city }}</span>
+                        {% endfor %}
+                    </div>
+                    <input type="hidden" name="cities" id="citiesInput">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">政治面貌</label>
+                    <select class="form-select" name="political">
+                        <option value="">不限</option>
+                        <option value="不限">不限</option>
+                        <option value="中共党员">中共党员</option>
+                        <option value="中共党员或共青团员">中共党员或共青团员</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">基层经历</label>
+                    <select class="form-select" name="experience">
+                        <option value="">不限</option>
+                        <option value="不限">不限</option>
+                        <option value="2年以上基层工作经历">2年以上基层</option>
+                    </select>
+                </div>
+                <div class="col-12 text-center mt-3">
+                    <button type="submit" class="btn btn-search btn-lg px-5">
+                        <i class="bi bi-search"></i> 开始搜索
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Charts -->
+<div class="container mt-5">
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="chart-card fade-in-up">
+                <h5><i class="bi bi-bar-chart"></i> 各地市岗位分布</h5>
+                <div id="chart-cities" style="height: 350px;"></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-card fade-in-up">
+                <h5><i class="bi bi-graph-up"></i> 历年招录趋势</h5>
+                <div id="chart-year-trend" style="height: 350px;"></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-card fade-in-up">
+                <h5><i class="bi bi-pie-chart"></i> 系统类别分布</h5>
+                <div id="chart-system" style="height: 350px;"></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-card fade-in-up">
+                <h5><i class="bi bi-pie-chart"></i> 学历要求分布</h5>
+                <div id="chart-edu" style="height: 350px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Stats Table -->
+<div class="container mt-5">
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <i class="bi bi-trophy"></i> 🔥 进面分数最高岗位 TOP5
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>招录机关</th>
+                                <th>地市</th>
+                                <th>平均分</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in stats.hardest %}
+                            <tr>
+                                <td class="text-truncate" style="max-width:200px">{{ p.unit }}</td>
+                                <td>{{ p.city }}</td>
+                                <td><strong style="color:var(--danger)">{{ "%.2f"|format(p.avg_score) }}</strong></td>
+                                <td><a href="/position/{{ p.id }}" class="btn btn-sm btn-outline-primary">详情</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <i class="bi bi-emoji-smile"></i> 🍀 进面分数最低岗位 TOP5
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>招录机关</th>
+                                <th>地市</th>
+                                <th>平均分</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in stats.easiest %}
+                            <tr>
+                                <td class="text-truncate" style="max-width:200px">{{ p.unit }}</td>
+                                <td>{{ p.city }}</td>
+                                <td>{{ "%.2f"|format(p.avg_score) if p.avg_score else '-' }}</strong></td>
+                                <td><a href="/position/{{ p.id }}" class="btn btn-sm btn-outline-primary">详情</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// 城市多选
+document.querySelectorAll('.city-pill').forEach(pill => {
+    pill.addEventListener('click', function() {
+        this.classList.toggle('active');
+        updateCityInput();
+    });
+});
+function updateCityInput() {
+    const selected = [];
+    document.querySelectorAll('.city-pill.active').forEach(p => selected.push(p.dataset.city));
+    document.getElementById('citiesInput').value = selected.join(',');
+}
+
+// 初始化图表
+document.addEventListener('DOMContentLoaded', function() {
+    initCitiesBarChart('chart-cities', {{ stats.by_city | tojson }});
+    initYearTrendChart('chart-year-trend', {{ stats.by_year | tojson }});
+    initSystemPieChart('chart-system', {{ stats.by_system | tojson }});
+    initEduPieChart('chart-edu', {{ stats.by_edu | tojson }});
+});
+</script>
+{% endblock %}

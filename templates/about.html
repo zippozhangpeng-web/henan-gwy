@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}关于 - 好风公考情报站{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <i class="bi bi-info-circle"></i> 关于本站
+                </div>
+                <div class="card-body">
+                    <h4 style="color: var(--primary);">好风公考情报站</h4>
+                    <p class="text-muted">数据驱动的公考选岗助手</p>
+                    <hr>
+
+                    <h5>📊 数据来源</h5>
+                    <p>岗位数据来源于河南省人事考试网（<a href="http://www.hnrsks.com" target="_blank">www.hnrsks.com</a>）历年公务员考试招录公告中的职位表，以及后续公布的面试名单、体检名单等公开信息。</p>
+
+                    <h5>📋 数据范围</h5>
+                    <ul>
+                        <li>收录年份：2022-2026年（近5年）</li>
+                        <li>覆盖范围：河南省18个地市全部岗位</li>
+                        <li>包含省直、市直、区县、乡镇各级各类岗位</li>
+                    </ul>
+
+                    <h5>🎯 核心功能</h5>
+                    <ul>
+                        <li><strong>岗位检索</strong> — 按年份、专业、学历、地市等多维度搜索</li>
+                        <li><strong>四维雷达分析</strong> — 从上岸难度、地区优劣、薪酬待遇、发展前景四个维度综合评估</li>
+                        <li><strong>进面分数线</strong> — 提供各岗位历史进面分数线参考</li>
+                        <li><strong>数据可视化</strong> — 多维度图表展示招录趋势和岗位分布</li>
+                    </ul>
+
+                    <h5>⚠️ 免责声明</h5>
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        本站数据仅供参考，不构成报考建议。请以河南省人事考试网发布的官方公告和职位表为准。
+                        进面分数线为模拟数据（真实数据需从面试公告中提取），实际分数可能有所不同。
+                    </div>
+
+                    <h5>🛠️ 技术栈</h5>
+                    <p>
+                        <span class="badge bg-primary">Flask</span>
+                        <span class="badge bg-primary">SQLite</span>
+                        <span class="badge bg-primary">Bootstrap 5</span>
+                        <span class="badge bg-primary">ECharts</span>
+                        <span class="badge bg-primary">Python</span>
+                    </p>
+
+                    <h5>📮 反馈与建议</h5>
+                    <p>如果你发现数据错误或有任何建议，欢迎反馈。</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

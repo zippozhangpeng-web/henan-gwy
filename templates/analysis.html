@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% block title %}数据分析 - 河南公考岗位情报站{% endblock %}
+{% block content %}
+
+<div class="container mt-4">
+    <h3 class="mb-4" style="color: var(--primary);">
+        <i class="bi bi-bar-chart-fill"></i> 全局数据分析
+    </h3>
+
+    <!-- Summary Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.total_positions }}</div>
+                <div class="stat-label">总岗位数</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.total_recruit }}</div>
+                <div class="stat-label">总招录人数</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.avg_score }}</div>
+                <div class="stat-label">平均进面分</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-card">
+                <div class="stat-number">{{ stats.by_city | length }}</div>
+                <div class="stat-label">覆盖地市</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h5>📈 历年招录趋势</h5>
+                <div id="chart-year-trend" style="height: 400px;"></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h5>🏙️ 各地市岗位数 & 平均分数线</h5>
+                <div id="chart-city-score" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h5>🏛️ 系统类别分布</h5>
+                <div id="chart-system" style="height: 400px;"></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="chart-card">
+                <h5>🎓 学历要求分布</h5>
+                <div id="chart-edu" style="height: 400px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detail Tables -->
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">📊 各地市详细数据</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>地市</th>
+                                <th>岗位数</th>
+                                <th>招录人数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in stats.by_city %}
+                            <tr>
+                                <td><strong>{{ c.city }}</strong></td>
+                                <td>{{ c.cnt }}</td>
+                                <td>{{ c.total_recruit }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">📅 历年详细数据</div>
+                <div class="card-body p-0">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th>年份</th>
+                                <th>岗位数</th>
+                                <th>招录人数</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for y in stats.by_year %}
+                            <tr>
+                                <td><strong>{{ y.year }}年</strong></td>
+                                <td>{{ y.cnt }}</td>
+                                <td>{{ y.total_recruit }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initYearTrendChart('chart-year-trend', {{ stats.by_year | tojson }});
+
+    // City score chart data
+    var cityScoreData = [];
+    {% for c in stats.by_city %}
+    {% set avg_s = c.get('avg_score', 0) %}
+    cityScoreData.push({
+        city: '{{ c.city }}',
+        avg_score: {{ "%.2f"|format(c.get('avg_score', 0) or 0) }},
+        cnt: {{ c.cnt }}
+    });
+    {% endfor %}
+    initCityScoreChart('chart-city-score', cityScoreData);
+
+    initSystemPieChart('chart-system', {{ stats.by_system | tojson }});
+    initEduPieChart('chart-edu', {{ stats.by_edu | tojson }});
+});
+</script>
+{% endblock %}
