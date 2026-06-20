@@ -172,25 +172,46 @@ def server_error(e):
 if __name__ == '__main__':
     # 确保数据库存在
     db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gwy_data.db')
-    # 检查数据库是否有真实数据（seed_data只有~2000条，真实数据~31500条）
+    # 检查数据库状态
     need_rebuild = False
+    need_scores = False
     if not os.path.exists(db_path):
         need_rebuild = True
     else:
         try:
             c = sqlite3.connect(db_path)
             cnt = c.execute('SELECT COUNT(*) FROM positions').fetchone()[0]
+            score_cnt = c.execute('SELECT COUNT(*) FROM positions WHERE min_score IS NOT NULL').fetchone()[0]
             c.close()
             if cnt < 10000:
                 need_rebuild = True
-                print(f"⚠️  数据库仅有 {cnt} 条数据（疑似旧版seed数据），正在重新导入...")
+                print(f"⚠️  数据库仅有 {cnt} 条数据，重新导入...")
+            elif score_cnt < 1000:
+                need_scores = True
+                print(f"⚠️  数据库有 {cnt} 条岗位但仅 {score_cnt} 条有进面分，导入分数...")
         except:
             need_rebuild = True
 
+    import subprocess
+    root_dir = os.path.dirname(os.path.abspath(__file__))
+
     if need_rebuild:
-        print("⏳ 正在从官方数据重新构建数据库（解析5年职位表Excel）...")
-        import subprocess
-        subprocess.run([sys.executable, 'download_real_data.py'], cwd=os.path.dirname(os.path.abspath(__file__)))
+        print("⏳ 正在从官方数据重新构建数据库...")
+        subprocess.run([sys.executable, 'download_real_data.py'], cwd=root_dir)
+        need_scores = True
+
+    if need_scores:
+        print("⏳ 正在导入面试进面分数数据...")
+        for script in ['import_scores.py', 'import_pdf_scores.py']:
+            sp = os.path.join(root_dir, script)
+            if os.path.exists(sp):
+                subprocess.run([sys.executable, script], cwd=root_dir)
+        # 导入进面分数
+        print("⏳ 正在导入面试分数数据...")
+        for script in ['import_scores.py', 'import_pdf_scores.py']:
+            sp = os.path.join(os.path.dirname(os.path.abspath(__file__)), script)
+            if os.path.exists(sp):
+                subprocess.run([sys.executable, script], cwd=os.path.dirname(os.path.abspath(__file__)))
 
     print("=" * 60)
     print("🏛️  河南公考岗位情报站")
