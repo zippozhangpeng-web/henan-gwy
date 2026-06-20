@@ -128,7 +128,7 @@
                             <td class="text-truncate" style="max-width:120px" title="{{ pos.major_requirement }}"><small>{{ pos.major_requirement }}</small></td>
                             <td>
                                 {% if pos.min_score %}
-                                <span class="badge {% if pos.avg_score >= 65 %}bg-danger{% elif pos.avg_score >= 60 %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                                <span class="badge {% if pos.min_score >= 65 %}bg-danger{% elif pos.min_score >= 60 %}bg-warning text-dark{% else %}bg-success{% endif %}">
                                     {{ "%.2f"|format(pos.min_score) }}
                                 </span>
                                 {% else %}
