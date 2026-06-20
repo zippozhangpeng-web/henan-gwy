@@ -22,8 +22,8 @@
             <span class="badge bg-light text-dark me-2">{{ p.position_name }}</span>
             <span class="badge bg-warning text-dark me-2">招{{ p.recruit_num }}人</span>
             <span class="badge bg-info me-2">{{ p.education }}</span>
-            {% if p.avg_score %}
-            <span class="badge bg-danger">进面均分 {{ "%.2f"|format(p.avg_score) }}</span>
+            {% if p.min_score %}
+            <span class="badge bg-danger">进面最低分 {{ "%.2f"|format(p.min_score) }}</span>
             {% endif %}
         </p>
     </div>
