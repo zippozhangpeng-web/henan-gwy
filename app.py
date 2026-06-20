@@ -170,8 +170,23 @@ def server_error(e):
 if __name__ == '__main__':
     # 确保数据库存在
     db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gwy_data.db')
+    # 检查数据库是否有真实数据（seed_data只有~2000条，真实数据~31500条）
+    need_rebuild = False
     if not os.path.exists(db_path):
-        print("⚠️  数据库不存在，正在从官方数据导入...")
+        need_rebuild = True
+    else:
+        try:
+            c = sqlite3.connect(db_path)
+            cnt = c.execute('SELECT COUNT(*) FROM positions').fetchone()[0]
+            c.close()
+            if cnt < 10000:
+                need_rebuild = True
+                print(f"⚠️  数据库仅有 {cnt} 条数据（疑似旧版seed数据），正在重新导入...")
+        except:
+            need_rebuild = True
+
+    if need_rebuild:
+        print("⏳ 正在从官方数据重新构建数据库（解析5年职位表Excel）...")
         import subprocess
         subprocess.run([sys.executable, 'download_real_data.py'], cwd=os.path.dirname(os.path.abspath(__file__)))
 
