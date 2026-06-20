@@ -13,10 +13,10 @@
             <form action="/search" method="GET" class="row g-2">
                 <div class="col-md-2">
                     <label class="form-label small fw-bold">年份</label>
-                    <select class="form-select form-select-sm" name="year" data-default="2025">
-                        <option value="all">全部年份</option>
+                    <select class="form-select form-select-sm" name="year" id="yearSelect">
+                        <option value="all" {% if current_year == 'all' %}selected{% endif %}>全部年份</option>
                         {% for y in years %}
-                        <option value="{{ y }}" {% if request.args.get('year') == y|string %}selected{% endif %}>{{ y }}年</option>
+                        <option value="{{ y }}" {% if current_year == y|string %}selected{% endif %}>{{ y }}年</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -37,7 +37,7 @@
                 <div class="col-md-2">
                     <label class="form-label small fw-bold">地市</label>
                     <select class="form-select form-select-sm" name="city">
-                        <option value="all">全部年份</option>
+                        <option value="">不限</option>
                         {% for c in cities %}
                         <option value="{{ c.city }}" {% if request.args.get('city') == c.city %}selected{% endif %}>{{ c.city }}</option>
                         {% endfor %}
@@ -59,6 +59,17 @@
             </form>
         </div>
     </div>
+
+    <script>
+    // 无year参数时自动跳转到 ?year=2025
+    (function() {
+        if (!window.location.search.includes('year=')) {
+            var params = new URLSearchParams(window.location.search);
+            params.set('year', '2025');
+            window.location.replace(window.location.pathname + '?' + params.toString());
+        }
+    })();
+    </script>
 
     <!-- Results -->
     <div class="card">
@@ -127,7 +138,7 @@
                             <td><small>{{ pos.education }}</small></td>
                             <td class="text-truncate" style="max-width:120px" title="{{ pos.major_requirement }}"><small>{{ pos.major_requirement }}</small></td>
                             <td>
-                                {% if pos.min_score %}
+                                {% if pos.min_score is not none and pos.min_score > 0 %}
                                 <span class="badge {% if pos.min_score >= 65 %}bg-danger{% elif pos.min_score >= 60 %}bg-warning text-dark{% else %}bg-success{% endif %}">
                                     {{ "%.2f"|format(pos.min_score) }}
                                 </span>

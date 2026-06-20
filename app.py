@@ -54,7 +54,8 @@ def search():
     political = request.args.get('political', '').strip()
     experience = request.args.get('experience', '').strip()
     year = request.args.get('year', '').strip()
-    # 默认显示2025年（有进面分数据），选"全部"时传 year=all
+    # 默认选中2025年，选"全部"时传 year=all
+    current_year = year if year else '2025'
     if not year:
         year = '2025'
     elif year == 'all':
@@ -96,6 +97,7 @@ def search():
         result=result,
         years=years,
         cities=cities,
+        current_year=current_year,
         sort_by=request.args.get('sort_by', ''),
         order=request.args.get('order', ''),
         query_params=query_params
@@ -112,17 +114,18 @@ def position_detail(position_id):
     pos = detail['position']
     # 动态计算评分
     if detail['scores']:
+        s = detail['scores']
         scores = {
-            'difficulty_score': detail['scores']['difficulty_score'],
-            'difficulty_label': get_difficulty_label(detail['scores']['difficulty_score']),
-            'difficulty_detail': detail['scores']['difficulty_detail'],
-            'region_score': detail['scores']['region_score'],
-            'region_detail': detail['scores']['region_detail'],
-            'salary_score': detail['scores']['salary_score'],
-            'salary_detail': detail['scores']['salary_detail'],
-            'prospect_score': detail['scores']['prospect_score'],
-            'prospect_detail': detail['scores']['prospect_detail'],
-            'overall_score': detail['scores']['overall_score'],
+            'difficulty_score': s['difficulty_score'] or 5.0,
+            'difficulty_label': get_difficulty_label(s['difficulty_score'] or 5.0),
+            'difficulty_detail': s['difficulty_detail'] or '',
+            'region_score': s['region_score'] or 5.0,
+            'region_detail': s['region_detail'] or '',
+            'salary_score': s['salary_score'] or 5.0,
+            'salary_detail': s['salary_detail'] or '',
+            'prospect_score': s['prospect_score'] or 5.0,
+            'prospect_detail': s['prospect_detail'] or '',
+            'overall_score': s['overall_score'] or 5.0,
             'city_data': get_score_detail(pos)['city_data']
         }
     else:
@@ -211,12 +214,6 @@ if __name__ == '__main__':
             sp = os.path.join(root_dir, script)
             if os.path.exists(sp):
                 subprocess.run([sys.executable, script], cwd=root_dir)
-        # 导入进面分数
-        print("⏳ 正在导入面试分数数据...")
-        for script in ['import_scores.py', 'import_pdf_scores.py']:
-            sp = os.path.join(os.path.dirname(os.path.abspath(__file__)), script)
-            if os.path.exists(sp):
-                subprocess.run([sys.executable, script], cwd=os.path.dirname(os.path.abspath(__file__)))
 
     print("=" * 60)
     print("🏛️  河南公考岗位情报站")

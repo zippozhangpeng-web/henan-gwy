@@ -158,7 +158,11 @@ def get_stats():
     # 推荐岗位：综合评分最高的6个（带四维评分）
     top_positions = conn.execute(
         """SELECT p.id, p.unit, p.position_name, p.city, p.recruit_num, p.education,
-                  ps.overall_score, ps.difficulty_score, ps.region_score, ps.salary_score, ps.prospect_score
+                  COALESCE(ps.overall_score, 5.0) as overall_score,
+                  COALESCE(ps.difficulty_score, 5.0) as difficulty_score,
+                  COALESCE(ps.region_score, 5.0) as region_score,
+                  COALESCE(ps.salary_score, 5.0) as salary_score,
+                  COALESCE(ps.prospect_score, 5.0) as prospect_score
            FROM positions p
            JOIN position_scores ps ON p.id = ps.position_id
            ORDER BY ps.overall_score DESC
