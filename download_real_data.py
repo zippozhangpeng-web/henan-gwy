@@ -70,26 +70,27 @@ def gv(s, r, c, xl):
     except: return ''
 
 def parse_sheet(s, year, xl, nrows, ncols, start, label):
-    cols2503 = {0:'u',1:'p',2:'c',3:'n',4:'e',5:'m',6:'a',7:'x',8:'o',9:'k'}
-    cols2512 = {0:'u',1:'p',2:'c',3:'n',4:'a',5:'e',6:'x',7:'o',8:'m',11:'k'}
-    cols2513 = {0:'u',1:'p',2:'c',3:'n',4:'a',5:'e',6:'d',7:'m',8:'x',9:'o',12:'k'}
-    cm = cols2503 if year == 2022 else (cols2512 if year == 2023 else cols2513)
+    # 列映射：先定义 {标签: 列号} 反转 -> {列号: 标签}
+    _2503 = {'u':0,'p':1,'c':2,'n':3,'e':4,'m':5,'a':6,'x':7,'o':8,'k':9}
+    _2512 = {'u':0,'p':1,'c':2,'n':3,'a':4,'e':5,'x':6,'o':7,'m':8,'k':11}
+    _2513 = {'u':0,'p':1,'c':2,'n':3,'a':4,'e':5,'d':6,'m':7,'x':8,'o':9,'k':12}
+    cm = _2503 if year == 2022 else (_2512 if year == 2023 else _2513)
     recs, lu = [], ''
     if xl:
         for r in range(start, nrows):
             u = gv(s, r, 0, xl)
-            p = gv(s, r, cm.get('p',1), xl)
-            # 跳过真正的空行（unit和pos都为空），但保留合并单元格延续行（unit空但pos有值）
+            p = gv(s, r, cm['p'], xl)
             if (not u and not p) or '招考职位由' in u or ('职位表' in u and '河南省' in u[:20]):
                 continue
             if u: lu = u
             else: u = lu
             recs.append({
                 'year':year, 'unit':u, 'pos':p,
-                'code':gv(s,r,cm.get('c',2),xl), 'num':_i(gv(s,r,cm.get('n',3),xl)),
-                'edu':gv(s,r,cm.get('e',5),xl), 'deg':gv(s,r,cm.get('d',0),xl) if 'd' in cm else '',
-                'maj':gv(s,r,cm.get('m',7),xl), 'exp':gv(s,r,cm.get('x',8),xl),
-                'oth':gv(s,r,cm.get('o',9),xl), 'note':gv(s,r,cm.get('k',12),xl),
+                'code':gv(s,r,cm['c'],xl), 'num':_i(gv(s,r,cm['n'],xl)),
+                'edu':gv(s,r,cm['e'],xl),
+                'deg':gv(s,r,cm['d'],xl) if 'd' in cm else '',
+                'maj':gv(s,r,cm['m'],xl), 'exp':gv(s,r,cm['x'],xl),
+                'oth':gv(s,r,cm['o'],xl), 'note':gv(s,r,cm['k'],xl),
             })
     else:
         for r_idx, row in enumerate(s.iter_rows(min_row=start+1, values_only=True)):
@@ -100,24 +101,34 @@ def parse_sheet(s, year, xl, nrows, ncols, start, label):
                 v = row_tuple[idx] if idx < len(row_tuple) else ''
                 if v is None: return ''
                 return str(int(v)) if isinstance(v, float) and v == int(v) else str(v).strip()
-            p = _g(cm.get('p',1))
+            p = _g(cm['p'])
             if (not u and not p) or '招考职位由' in u or ('职位表' in u and '河南省' in u[:20]):
                 continue
             if u: lu = u
             else: u = lu
             recs.append({
                 'year':year, 'unit':u, 'pos':p,
-                'code':_g(cm.get('c',2)), 'num':_i(_g(cm.get('n',3))),
-                'edu':_g(cm.get('e',5)),
-                'deg':_g(cm.get('d',0)) if 'd' in cm else '',
-                'maj':_g(cm.get('m',7)), 'exp':_g(cm.get('x',8)),
-                'oth':_g(cm.get('o',9)), 'note':_g(cm.get('k',12)),
+                'code':_g(cm['c']), 'num':_i(_g(cm['n'])),
+                'edu':_g(cm['e']),
+                'deg':_g(cm['d']) if 'd' in cm else '',
+                'maj':_g(cm['m']), 'exp':_g(cm['x']),
+                'oth':_g(cm['o']), 'note':_g(cm['k']),
             })
     return recs
 
 def _i(v):
     try: return int(float(v.replace(',','')))
     except: return 0
+
+def _edu_norm(edu):
+    """标准化学历分级"""
+    e = edu.strip()
+    if not e: return '不限'
+    if any(k in e for k in ['博士','硕士','研究生']): return '研究生以上'
+    if any(k in e for k in ['本科','学士']): return '本科以上'
+    if '大专' in e or '专科' in e: return '大专以上'
+    if '高中' in e or '中专' in e: return '其他'
+    return '不限'
 
 def _city(u):
     if not u: return '其他'
@@ -147,7 +158,7 @@ def _sys(u, p):
     if '交通' in u or '运输' in u: return '交通系统'
     if '农业农村' in u: return '农业农村系统'
     if '人社' in u or '人力资源' in u: return '人社系统'
-    if '民政' in u: return '民政系统'
+    if '民政' in u and '人民' not in u: return '民政系统'
     if '生态' in u or '环境' in u: return '生态环境系统'
     if '自然' in u or '规划' in u: return '自然资源系统'
     if '水利' in u: return '水利系统'
@@ -179,7 +190,8 @@ def import_db(recs):
         major_requirement TEXT, education TEXT, degree TEXT, political_status TEXT,
         experience_requirement TEXT, other_conditions TEXT, notes TEXT, exam_category TEXT,
         interview_ratio TEXT, city TEXT, district TEXT, system_type TEXT,
-        min_score REAL, max_score REAL, avg_score REAL, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+        min_score REAL, max_score REAL, avg_score REAL, exam_category_norm TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
     c.execute('''CREATE TABLE position_scores (position_id INTEGER PRIMARY KEY, difficulty_score REAL,
         difficulty_detail TEXT, region_score REAL, region_detail TEXT, salary_score REAL,
         salary_detail TEXT, prospect_score REAL, prospect_detail TEXT, overall_score REAL)''')
@@ -190,12 +202,15 @@ def import_db(recs):
         city = _city(r['unit'])
         st = _sys(r['unit'], r['pos'])
         political = '中共党员' if '中共党员' in r.get('oth','') else ''
+        # 标准化学历等级：大专以上/本科以上/研究生以上
+        edu_norm = _edu_norm(r['edu'])
         entries.append((r['year'],r['unit'],r['pos'],r['code'],r['num'],r['maj'],r['edu'],r['deg'],
-            political,r['exp'],r['oth'],r['note'],'','',city,'',st,None,None,None))
+            political,r['exp'],r['oth'],r['note'],'','',city,'',st,None,None,None,
+            edu_norm))
     c.executemany('''INSERT INTO positions (year,unit,position_name,position_code,recruit_num,
         major_requirement,education,degree,political_status,experience_requirement,
         other_conditions,notes,exam_category,interview_ratio,city,district,system_type,
-        min_score,max_score,avg_score) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''', entries)
+        min_score,max_score,avg_score,exam_category_norm) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''', entries)
     conn.commit()
     c.execute('SELECT COUNT(*) FROM positions'); t = c.fetchone()[0]
     print(f'\n✅ 导入完成! 总岗位数: {t}')
