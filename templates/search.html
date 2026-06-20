@@ -13,8 +13,8 @@
             <form action="/search" method="GET" class="row g-2">
                 <div class="col-md-2">
                     <label class="form-label small fw-bold">年份</label>
-                    <select class="form-select form-select-sm" name="year">
-                        <option value="">全部</option>
+                    <select class="form-select form-select-sm" name="year" data-default="2025">
+                        <option value="all">全部年份</option>
                         {% for y in years %}
                         <option value="{{ y }}" {% if request.args.get('year') == y|string %}selected{% endif %}>{{ y }}年</option>
                         {% endfor %}
@@ -37,7 +37,7 @@
                 <div class="col-md-2">
                     <label class="form-label small fw-bold">地市</label>
                     <select class="form-select form-select-sm" name="city">
-                        <option value="">全部</option>
+                        <option value="all">全部年份</option>
                         {% for c in cities %}
                         <option value="{{ c.city }}" {% if request.args.get('city') == c.city %}selected{% endif %}>{{ c.city }}</option>
                         {% endfor %}

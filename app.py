@@ -54,6 +54,11 @@ def search():
     political = request.args.get('political', '').strip()
     experience = request.args.get('experience', '').strip()
     year = request.args.get('year', '').strip()
+    # 默认显示2025年（有进面分数据），选"全部"时传 year=all
+    if not year:
+        year = '2025'
+    elif year == 'all':
+        year = ''
     sort_by = request.args.get('sort_by', '').strip()
     order = request.args.get('order', 'ASC').strip()
     page = request.args.get('page', 1, type=int)
