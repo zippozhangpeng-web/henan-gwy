@@ -140,18 +140,18 @@ def get_stats():
     ).fetchall()
     stats['by_edu'] = [dict(r) for r in by_edu]
 
-    # 平均分数线
+    # 平均分数线（可能为空）
     avg_score = conn.execute("SELECT AVG(avg_score) FROM positions WHERE avg_score > 0").fetchone()[0]
-    stats['avg_score'] = round(avg_score, 2) if avg_score else 0
+    stats['avg_score'] = round(float(avg_score), 2) if avg_score else 0
 
-    # 最难/最易岗位
+    # 热门/推荐岗位（avg_score为空时按招录人数排序）
     hardest = conn.execute(
-        "SELECT id, unit, position_name, city, avg_score FROM positions WHERE avg_score > 0 ORDER BY avg_score DESC LIMIT 5"
+        "SELECT id, unit, position_name, city, recruit_num FROM positions ORDER BY recruit_num DESC LIMIT 5"
     ).fetchall()
     stats['hardest'] = [dict(r) for r in hardest]
 
     easiest = conn.execute(
-        "SELECT id, unit, position_name, city, avg_score FROM positions WHERE avg_score > 0 ORDER BY avg_score ASC LIMIT 5"
+        "SELECT id, unit, position_name, city, recruit_num FROM positions WHERE recruit_num > 0 ORDER BY recruit_num ASC LIMIT 5"
     ).fetchall()
     stats['easiest'] = [dict(r) for r in easiest]
 

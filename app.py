@@ -29,10 +29,17 @@ def health():
 @app.route('/')
 def index():
     """首页"""
-    stats = get_stats()
-    years = get_years()
-    cities = get_cities()
-    return render_template('index.html', stats=stats, years=years, cities=cities)
+    try:
+        stats = get_stats()
+        years = get_years()
+        cities = get_cities()
+        return render_template('index.html', stats=stats, years=years, cities=cities)
+    except Exception as e:
+        print(f"首页渲染异常: {e}")
+        import traceback; traceback.print_exc()
+        stats = {'total_positions': 0, 'total_recruit': 0, 'by_year': [], 'by_city': [],
+                 'by_system': [], 'by_edu': [], 'avg_score': 0, 'hardest': [], 'easiest': []}
+        return render_template('index.html', stats=stats, years=[], cities=[])
 
 
 @app.route('/search')

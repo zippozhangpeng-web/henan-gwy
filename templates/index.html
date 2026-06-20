@@ -142,7 +142,7 @@
         <div class="col-lg-6">
             <div class="card fade-in-up">
                 <div class="card-header">
-                    <i class="bi bi-trophy"></i> 🔥 进面分数最高岗位 TOP5
+                    <i class="bi bi-trophy"></i> 🔥 招录人数最多 TOP5
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-hover mb-0">
@@ -150,7 +150,7 @@
                             <tr>
                                 <th>招录机关</th>
                                 <th>地市</th>
-                                <th>平均分</th>
+                                <th>招录人数</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -159,7 +159,7 @@
                             <tr>
                                 <td class="text-truncate" style="max-width:200px">{{ p.unit }}</td>
                                 <td>{{ p.city }}</td>
-                                <td><strong style="color:var(--danger)">{{ "%.2f"|format(p.avg_score) }}</strong></td>
+                                <td><strong style="color:var(--primary)">{{ p.recruit_num }}人</strong></td>
                                 <td><a href="/position/{{ p.id }}" class="btn btn-sm btn-outline-primary">详情</a></td>
                             </tr>
                             {% endfor %}
@@ -171,7 +171,7 @@
         <div class="col-lg-6">
             <div class="card fade-in-up">
                 <div class="card-header">
-                    <i class="bi bi-emoji-smile"></i> 🍀 进面分数最低岗位 TOP5
+                    <i class="bi bi-emoji-smile"></i> 🍀 单岗招录最少 TOP5
                 </div>
                 <div class="card-body p-0">
                     <table class="table table-hover mb-0">
@@ -179,7 +179,7 @@
                             <tr>
                                 <th>招录机关</th>
                                 <th>地市</th>
-                                <th>平均分</th>
+                                <th>招录人数</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -188,7 +188,7 @@
                             <tr>
                                 <td class="text-truncate" style="max-width:200px">{{ p.unit }}</td>
                                 <td>{{ p.city }}</td>
-                                <td>{{ "%.2f"|format(p.avg_score) if p.avg_score else '-' }}</strong></td>
+                                <td>{{ p.recruit_num }}人</td>
                                 <td><a href="/position/{{ p.id }}" class="btn btn-sm btn-outline-primary">详情</a></td>
                             </tr>
                             {% endfor %}
