@@ -164,10 +164,9 @@ if __name__ == '__main__':
     # 确保数据库存在
     db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gwy_data.db')
     if not os.path.exists(db_path):
-        print("⚠️  数据库不存在，请先运行: python seed_data.py")
-        print("正在自动生成演示数据...")
+        print("⚠️  数据库不存在，正在从官方数据导入...")
         import subprocess
-        subprocess.run([sys.executable, 'seed_data.py'], cwd=os.path.dirname(os.path.abspath(__file__)))
+        subprocess.run([sys.executable, 'download_real_data.py'], cwd=os.path.dirname(os.path.abspath(__file__)))
 
     print("=" * 60)
     print("🏛️  河南公考岗位情报站")
