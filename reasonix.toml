@@ -1,0 +1,8 @@
+# Reasonix project config - 好风公考情报站
+config_version = 3
+default_model = "deepseek-flash"
+language = "zh"
+
+[agent]
+auto_plan = "on"
+temperature = 0.0

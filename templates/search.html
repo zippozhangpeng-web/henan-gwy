@@ -112,7 +112,7 @@
                             <th>学历</th>
                             <th>专业</th>
                             <th>进面分</th>
-                            <th>评分</th>
+                            <th>综合评分</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -137,9 +137,16 @@
                             </td>
                             <td>
                                 {% if pos.overall_score %}
-                                <span class="badge {% if pos.overall_score >= 7 %}bg-success{% elif pos.overall_score >= 5 %}bg-info{% else %}bg-secondary{% endif %}">
-                                    {{ "%.2f"|format(pos.overall_score) }}
-                                </span>
+                                <div class="d-flex align-items-center gap-1">
+                                    {% set stars = ((pos.overall_score / 2) | round(0, 'floor') | int) %}
+                                    <span class="score-stars" style="color: #FDCB6E; white-space: nowrap;">
+                                        {% for i in range(stars) %}★{% endfor %}
+                                        {% for i in range(5 - stars) %}<span style="color:#ddd">★</span>{% endfor %}
+                                    </span>
+                                    <strong class="small" style="color: var(--primary);">{{ "%.1f"|format(pos.overall_score) }}</strong>
+                                </div>
+                                {% else %}
+                                <span class="text-muted">-</span>
                                 {% endif %}
                             </td>
                             <td>

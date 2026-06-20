@@ -155,6 +155,17 @@ def get_stats():
     ).fetchall()
     stats['easiest'] = [dict(r) for r in easiest]
 
+    # 推荐岗位：综合评分最高的6个（带四维评分）
+    top_positions = conn.execute(
+        """SELECT p.id, p.unit, p.position_name, p.city, p.recruit_num, p.education,
+                  ps.overall_score, ps.difficulty_score, ps.region_score, ps.salary_score, ps.prospect_score
+           FROM positions p
+           JOIN position_scores ps ON p.id = ps.position_id
+           ORDER BY ps.overall_score DESC
+           LIMIT 6"""
+    ).fetchall()
+    stats['top_positions'] = [dict(r) for r in top_positions]
+
     conn.close()
     return stats
 

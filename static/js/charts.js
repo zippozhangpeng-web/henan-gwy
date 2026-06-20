@@ -267,6 +267,63 @@ function initRadarChart(elementId, scores) {
     return chart;
 }
 
+// ========== 迷你雷达图（首页推荐卡片用）==========
+
+function initMiniRadarChart(elementId, scores) {
+    const el = document.getElementById(elementId);
+    if (!el) return;
+    const chart = echarts.init(el);
+    chart.setOption({
+        radar: {
+            center: ['50%', '55%'],
+            radius: '65%',
+            indicator: [
+                { name: '上岸难度', max: 10 },
+                { name: '地区优劣', max: 10 },
+                { name: '薪酬待遇', max: 10 },
+                { name: '发展前景', max: 10 }
+            ],
+            axisName: {
+                color: '#636E72',
+                fontSize: 9,
+                fontWeight: 600
+            },
+            shape: 'polygon',
+            splitArea: {
+                areaStyle: {
+                    color: ['rgba(108,92,231,0.02)', 'rgba(108,92,231,0.04)',
+                            'rgba(108,92,231,0.06)', 'rgba(108,92,231,0.08)']
+                }
+            },
+            splitLine: {
+                lineStyle: { color: 'rgba(108,92,231,0.1)' }
+            },
+            axisLine: {
+                lineStyle: { color: 'rgba(108,92,231,0.15)' }
+            },
+            splitNumber: 4
+        },
+        series: [{
+            type: 'radar',
+            symbol: 'none',
+            data: [{
+                value: [
+                    scores.difficulty_score,
+                    scores.region_score,
+                    scores.salary_score,
+                    scores.prospect_score
+                ],
+                areaStyle: {
+                    color: COLORS.gradient('rgba(255,107,53,0.25)', 'rgba(108,92,231,0.04)')
+                },
+                lineStyle: { color: '#FF6B35', width: 1.8 },
+                itemStyle: { color: '#FF6B35' }
+            }]
+        }]
+    });
+    return chart;
+}
+
 // ========== 分数线柱状图（语义化配色）==========
 
 function initScoreBar(elementId, minScore, maxScore, avgScore) {

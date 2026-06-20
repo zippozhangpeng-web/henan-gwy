@@ -4,6 +4,7 @@
 """
 import os
 import sys
+import sqlite3
 from flask import Flask, render_template, request, jsonify
 
 # Add project root to path
@@ -38,7 +39,8 @@ def index():
         print(f"首页渲染异常: {e}")
         import traceback; traceback.print_exc()
         stats = {'total_positions': 0, 'total_recruit': 0, 'by_year': [], 'by_city': [],
-                 'by_system': [], 'by_edu': [], 'avg_score': 0, 'hardest': [], 'easiest': []}
+                 'by_system': [], 'by_edu': [], 'avg_score': 0, 'hardest': [], 'easiest': [],
+                 'top_positions': []}
         return render_template('index.html', stats=stats, years=[], cities=[])
 
 
@@ -121,7 +123,7 @@ def position_detail(position_id):
     else:
         scores = get_score_detail(pos)
 
-    return render_template('position.html', pos=pos, scores=scores, scores_json=json.dumps(scores, ensure_ascii=False))
+    return render_template('position_detail.html', pos=pos, scores=scores, scores_json=json.dumps(scores, ensure_ascii=False))
 
 
 def get_difficulty_label(score):

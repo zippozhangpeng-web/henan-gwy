@@ -625,3 +625,25 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--primary);
 }
+
+/* ===== Recommend Cards ===== */
+.recommend-card {
+  transition: all 0.3s ease;
+  border: 2px solid transparent;
+}
+
+.recommend-card:hover {
+  border-color: var(--primary-light);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-hover);
+}
+
+.mini-score {
+  font-size: 1.6rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #FF6B35, #FF3366);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}

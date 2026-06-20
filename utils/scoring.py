@@ -55,8 +55,8 @@ def calculate_difficulty(position):
     """上岸难易程度 (1-10)"""
     score = 5.0
     city = position.get('city', '郑州')
-    recruit_num = position.get('recruit_num', 1)
-    min_score = position.get('min_score', 60)
+    recruit_num = position.get('recruit_num') or 1
+    min_score = position.get('min_score') or 60
     education = position.get('education', '本科及以上')
     political = position.get('political_status', '不限')
 
@@ -186,9 +186,9 @@ def get_score_detail(position):
     city = position.get('city', '郑州')
     sys_type = position.get('system_type', '')
     district = position.get('district', '')
-    min_score = position.get('min_score', 0)
-    max_score = position.get('max_score', 0)
-    avg_score = position.get('avg_score', 0)
+    min_score = position.get('min_score') or 0
+    max_score = position.get('max_score') or 0
+    avg_score = position.get('avg_score') or 0
     city_data = CITY_DATA.get(city, CITY_DATA['郑州'])
 
     # 难度分析

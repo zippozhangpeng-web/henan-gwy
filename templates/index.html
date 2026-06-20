@@ -136,6 +136,52 @@
     </div>
 </div>
 
+<!-- 推荐岗位 -->
+{% if stats.top_positions %}
+<div class="container mt-5">
+    <div class="d-flex align-items-center mb-3">
+        <h4 class="mb-0" style="color: var(--primary); font-weight: 800;">
+            <i class="bi bi-star-fill"></i> 推荐岗位
+        </h4>
+        <span class="ms-2 badge bg-primary">综合评分 TOP6</span>
+    </div>
+    <div class="row g-3">
+        {% for tp in stats.top_positions %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card recommend-card fade-in-up h-100">
+                <div class="card-body p-3">
+                    <div class="d-flex align-items-start">
+                        <div class="flex-grow-1 min-width-0">
+                            <h6 class="card-title mb-1 text-truncate" title="{{ tp.unit }}">
+                                <a href="/position/{{ tp.id }}" class="text-decoration-none" style="color: var(--text);">
+                                    {{ tp.unit }}
+                                </a>
+                            </h6>
+                            <p class="card-text mb-1">
+                                <small class="text-muted">{{ tp.position_name }}</small>
+                            </p>
+                            <p class="mb-0">
+                                <span class="badge bg-info me-1">{{ tp.city }}</span>
+                                <span class="badge bg-secondary">{{ tp.education }}</span>
+                            </p>
+                        </div>
+                        <div class="text-end ms-2 flex-shrink-0">
+                            <div class="mini-score">{{ "%.1f"|format(tp.overall_score) }}</div>
+                            <small class="text-muted">/ 10</small>
+                        </div>
+                    </div>
+                    <div id="mini-radar-{{ tp.id }}" style="height: 160px; margin-top: 0.5rem;"></div>
+                    <a href="/position/{{ tp.id }}" class="btn btn-sm btn-outline-custom w-100 mt-2">
+                        查看详情 <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
 <!-- Quick Stats Table -->
 <div class="container mt-5">
     <div class="row g-4">
@@ -223,6 +269,14 @@ document.addEventListener('DOMContentLoaded', function() {
     initYearTrendChart('chart-year-trend', {{ stats.by_year | tojson }});
     initSystemPieChart('chart-system', {{ stats.by_system | tojson }});
     initEduPieChart('chart-edu', {{ stats.by_edu | tojson }});
+    {% for tp in stats.top_positions %}
+    initMiniRadarChart('mini-radar-{{ tp.id }}', {
+        difficulty_score: {{ tp.difficulty_score }},
+        region_score: {{ tp.region_score }},
+        salary_score: {{ tp.salary_score }},
+        prospect_score: {{ tp.prospect_score }}
+    });
+    {% endfor %}
 });
 </script>
 {% endblock %}

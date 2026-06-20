@@ -1,0 +1,246 @@
+{% extends "base.html" %}
+{% block title %}{{ pos.unit }} - {{ pos.position_name }} | 河南公考岗位情报站{% endblock %}
+
+{% set p = pos %}
+{% set s = scores %}
+
+{% block content %}
+
+<!-- Position Header -->
+<div class="position-header">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2" style="--bs-breadcrumb-divider: '›';">
+                <li class="breadcrumb-item"><a href="/" class="text-white-50">首页</a></li>
+                <li class="breadcrumb-item"><a href="/search" class="text-white-50">岗位搜索</a></li>
+                <li class="breadcrumb-item active text-white" aria-current="page">岗位详情</li>
+            </ol>
+        </nav>
+        <small class="text-white-50">{{ p.year }}年 · {{ p.city }} · {{ p.system_type }}</small>
+        <h2 class="mt-1">{{ p.unit }}</h2>
+        <p class="mb-0">
+            <span class="badge bg-light text-dark me-2">{{ p.position_name }}</span>
+            <span class="badge bg-warning text-dark me-2">招{{ p.recruit_num }}人</span>
+            <span class="badge bg-info me-2">{{ p.education }}</span>
+            {% if p.avg_score %}
+            <span class="badge bg-danger">进面均分 {{ "%.2f"|format(p.avg_score) }}</span>
+            {% endif %}
+        </p>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <div class="row g-4">
+        <!-- Left Column - Basic Info & Score -->
+        <div class="col-lg-4">
+            <!-- Basic Info Card -->
+            <div class="card fade-in-up">
+                <div class="card-header">
+                    <i class="bi bi-file-text"></i> 岗位基本信息
+                </div>
+                <div class="card-body p-0">
+                    <div class="info-row px-3">
+                        <span class="info-label">职位代码</span>
+                        <span class="info-value">{{ p.position_code or '-' }}</span>
+                    </div>
+                    <div class="info-row px-3">
+                        <span class="info-label">招录机关</span>
+                        <span class="info-value">{{ p.unit }}</span>
+                    </div>
+                    <div class="info-row px-3">
+                        <span class="info-label">职位名称</span>
+                        <span class="info-value">{{ p.position_name }}</span>
+                    </div>
+                    <div class="info-row px-3">
+                        <span class="info-label">招录人数</span>
+                        <span class="info-value"><strong>{{ p.recruit_num }}人</strong></span>
+                    </div>
+                    <div class="info-row px-3">
+                        <span class="info-label">专业要求</span>
+                        <span class="info-value">{{ p.major_requirement }}</span>
+                    </div>
+                    <div class="info-row px-3">
+                        <span class="info-label">学历要求</span>
+                        <span class="info-value">{{ p.education }}</span>
+                    </div>
+                    <div class="info-row px-3">
+                        <span class="info-label">学位要求</span>
+                        <span class="info-value">{{ p.degree or '-' }}</span>
+                    </div>
+                    <div class="info-row px-3">
+                        <span class="info-label">政治面貌</span>
+                        <span class="info-value">{{ p.political_status }}</span>
+                    </div>
+                    <div class="info-row px-3">
+                        <span class="info-label">基层经历</span>
+                        <span class="info-value">{{ p.experience_requirement }}</span>
+                    </div>
+                    <div class="info-row px-3">
+                        <span class="info-label">考试类别</span>
+                        <span class="info-value">{{ p.exam_category or '-' }}</span>
+                    </div>
+                    <div class="info-row px-3">
+                        <span class="info-label">面试比例</span>
+                        <span class="info-value">{{ p.interview_ratio or '-' }}</span>
+                    </div>
+                    <div class="info-row px-3">
+                        <span class="info-label">所属地市</span>
+                        <span class="info-value">{{ p.city }} · {{ p.district }}</span>
+                    </div>
+                    <div class="info-row px-3">
+                        <span class="info-label">系统类别</span>
+                        <span class="info-value"><span class="badge bg-primary">{{ p.system_type }}</span></span>
+                    </div>
+                    {% if p.other_conditions %}
+                    <div class="info-row px-3">
+                        <span class="info-label">其他条件</span>
+                        <span class="info-value">{{ p.other_conditions }}</span>
+                    </div>
+                    {% endif %}
+                    {% if p.notes %}
+                    <div class="info-row px-3">
+                        <span class="info-label">备注</span>
+                        <span class="info-value" style="color: var(--danger)">{{ p.notes }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Score Line Card -->
+            <div class="card mt-3 fade-in-up">
+                <div class="card-header">
+                    <i class="bi bi-graph-up"></i> 进面分数线
+                </div>
+                <div class="card-body">
+                    <div id="chart-score-bar" style="height: 250px;"></div>
+                    <div class="row text-center mt-2">
+                        <div class="col-4">
+                            <small class="text-muted">最低分</small><br>
+                            <strong class="text-success" style="font-size:1.3rem">{{ p.min_score or '-' }}</strong>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted">平均分</small><br>
+                            <strong class="text-primary" style="font-size:1.3rem">{{ "%.2f"|format(p.avg_score or 0) }}</strong>
+                        </div>
+                        <div class="col-4">
+                            <small class="text-muted">最高分</small><br>
+                            <strong class="text-danger" style="font-size:1.3rem">{{ p.max_score or '-' }}</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column - Analysis -->
+        <div class="col-lg-8">
+            <!-- Overall Score -->
+            <div class="card fade-in-up mb-4">
+                <div class="card-body text-center py-4">
+                    <h3 class="mb-1" style="color: var(--primary);">综合评分</h3>
+                    <div class="overall-rating my-2">
+                        {% set star_count = ((s.overall_score / 2) | round(0, 'floor') | int) %}
+                        {% for i in range(star_count) %}
+                        <span class="star">★</span>
+                        {% endfor %}
+                        {% for i in range(5 - star_count) %}
+                        <span class="star" style="color:#ddd">★</span>
+                        {% endfor %}
+                    </div>
+                    <div style="font-size: 2.5rem; font-weight: 800; color: var(--primary);">
+                        {{ s.overall_score }}
+                        <small style="font-size: 1rem; color: var(--text-light);">/ 10</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Radar Chart -->
+            <div class="card fade-in-up mb-4">
+                <div class="card-header">
+                    <i class="bi bi-pentagon"></i> 四维雷达分析
+                </div>
+                <div class="card-body">
+                    <div id="chart-radar" style="height: 400px;"></div>
+                </div>
+            </div>
+
+            <!-- Four Dimensions -->
+            <div class="row g-3 mb-4">
+                <!-- 上岸难度 -->
+                <div class="col-md-6">
+                    <div class="score-card fade-in-up">
+                        <div class="score-value">{{ s.difficulty_score }}</div>
+                        <div class="score-label">🎯 上岸难度</div>
+                        <div>
+                            <span class="badge {% if s.difficulty_score >= 7 %}bg-danger{% elif s.difficulty_score >= 5 %}bg-warning text-dark{% else %}bg-success{% endif %} fs-6">
+                                {{ s.difficulty_label }}
+                            </span>
+                        </div>
+                        <div class="score-desc mt-2 text-start">{{ s.difficulty_detail }}</div>
+                    </div>
+                </div>
+                <!-- 地区优劣 -->
+                <div class="col-md-6">
+                    <div class="score-card fade-in-up">
+                        <div class="score-value">{{ s.region_score }}</div>
+                        <div class="score-label">📍 地区优劣</div>
+                        <div class="score-desc mt-2 text-start">{{ s.region_detail }}</div>
+                    </div>
+                </div>
+                <!-- 薪酬待遇 -->
+                <div class="col-md-6">
+                    <div class="score-card fade-in-up">
+                        <div class="score-value">{{ s.salary_score }}</div>
+                        <div class="score-label">💰 薪酬待遇</div>
+                        <div class="score-desc mt-2 text-start">{{ s.salary_detail }}</div>
+                    </div>
+                </div>
+                <!-- 发展前景 -->
+                <div class="col-md-6">
+                    <div class="score-card fade-in-up">
+                        <div class="score-value">{{ s.prospect_score }}</div>
+                        <div class="score-label">📈 发展前景</div>
+                        <div class="score-desc mt-2 text-start">{{ s.prospect_detail }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- City Data Card -->
+            <div class="card fade-in-up mb-4">
+                <div class="card-header">
+                    <i class="bi bi-geo-alt"></i> {{ p.city }}城市数据
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-6 col-md-3 text-center">
+                            <small class="text-muted">GDP排名</small>
+                            <h4 style="color:var(--primary)">全省第{{ s.city_data.gdp_rank }}位</h4>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <small class="text-muted">GDP总量</small>
+                            <h4 style="color:var(--primary)">{{ s.city_data.gdp }}亿</h4>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <small class="text-muted">平均薪资</small>
+                            <h4 style="color:var(--primary)">{{ s.city_data.avg_salary }}元/月</h4>
+                        </div>
+                        <div class="col-6 col-md-3 text-center">
+                            <small class="text-muted">平均房价</small>
+                            <h4 style="color:var(--primary)">{{ s.city_data.house_price }}元/㎡</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initRadarChart('chart-radar', JSON.parse('{{ scores_json | safe }}'));
+    initScoreBar('chart-score-bar', {{ "%.2f"|format(pos.min_score or 0) }}, {{ "%.2f"|format(pos.max_score or 0) }}, {{ "%.2f"|format(pos.avg_score or 0) }});
+});
+</script>
+{% endblock %}
