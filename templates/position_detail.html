@@ -297,6 +297,64 @@
                 </div>
             </div>
 
+            <!-- Historical Volatility Card -->
+            <div class="card fade-in-up mb-4">
+                <div class="card-header">
+                    <i class="bi bi-graph-up-arrow"></i> 📈 历史分数波动（近5年）
+                </div>
+                <div class="card-body">
+                    {% if volatility.has_enough_data %}
+                    <div id="chart-volatility" style="height: 300px;"></div>
+                    <div class="volatility-analysis mt-3">
+                        <h6 class="mb-2">📊 波动分析</h6>
+                        <ul class="list-unstyled small mb-0">
+                            {% set v = volatility.volatility %}
+                            {% if v.highest %}
+                            <li class="mb-1">· 最高进面分: <strong>{{ "%.2f"|format(v.highest.value) }}分</strong> ({{ v.highest.year }}年)
+                                {% if v.highest.is_estimated %}<span class="badge bg-warning text-dark ms-1">参考分</span>{% endif %}
+                            </li>
+                            {% endif %}
+                            {% if v.lowest %}
+                            <li class="mb-1">· 最低进面分: <strong>{{ "%.2f"|format(v.lowest.value) }}分</strong> ({{ v.lowest.year }}年)
+                                {% if v.lowest.is_estimated %}<span class="badge bg-warning text-dark ms-1">参考分</span>{% endif %}
+                            </li>
+                            {% endif %}
+                            <li class="mb-1">· 分差: <strong>{{ "%.1f"|format(v.range) }}分</strong></li>
+                            <li class="mb-1">· 标准差: <strong>{{ "%.2f"|format(v.std_dev) }}</strong></li>
+                            <li class="mb-1">· 变异系数: <strong>{{ "%.2f"|format(v.cv) }}</strong></li>
+                            <li class="mb-1">
+                                · 波动趋势:
+                                {% if v.trend_type == '上升' %}
+                                <strong class="text-danger">📈 {{ v.trend_type }}</strong>（进面分逐年升高）
+                                {% elif v.trend_type == '下降' %}
+                                <strong class="text-success">📉 {{ v.trend_type }}</strong>（进面分逐年降低）
+                                {% elif v.trend_type == '震荡' %}
+                                <strong class="text-warning">📊 {{ v.trend_type }}</strong>（分数波动较大）
+                                {% else %}
+                                <strong class="text-muted">➡️ {{ v.trend_type }}</strong>（波动正常）
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="volatility-summary mt-2 p-2 rounded" style="background: var(--bg-light); border-left: 3px solid var(--primary);">
+                        <small>💡 {{ volatility.summary_text }}</small>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-bar-chart-line" style="font-size: 2rem; color: #ccc;"></i>
+                        <p class="text-muted mt-2">仅1年数据，不足以分析趋势</p>
+                        {% if volatility.scores %}
+                        <p class="text-muted small">
+                            {% set vs = volatility.scores[0] %}
+                            {{ vs.year }}年进面分: {{ "%.2f"|format(vs.min_score) }}分
+                            {% if vs.is_estimated %}<span class="badge bg-warning text-dark">参考分</span>{% endif %}
+                        </p>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
             <!-- City Data Card -->
             <div class="card fade-in-up mb-4">
                 <div class="card-header">
@@ -348,6 +406,9 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         initScoreBar('chart-score-bar', min, max, avg);
     }
+{% endif %}
+{% if volatility.has_enough_data %}
+    initVolatilityChart('chart-volatility', {{ volatility.scores | tojson }});
 {% endif %}
 });
 </script>

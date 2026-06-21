@@ -542,3 +542,147 @@ window.addEventListener('resize', function() {
         if (instance) instance.resize();
     });
 });
+
+// ========== 历史分数波动折线图 ==========
+
+function initVolatilityChart(elementId, data) {
+    // data: [{year, min_score, max_score, avg_score, is_estimated}...]
+    const el = document.getElementById(elementId);
+    if (!el || !data || data.length < 2) return;
+
+    const chart = echarts.init(el);
+
+    const years = data.map(function(d) { return d.year + '年'; });
+
+    // 真实数据和估算数据分别处理
+    const realData = data.map(function(d) {
+        return d.is_estimated ? null : {
+            value: d.avg_score || d.min_score,
+            year: d.year,
+            min: d.min_score,
+            max: d.max_score,
+            avg: d.avg_score
+        };
+    });
+    const estimatedData = data.map(function(d) {
+        return d.is_estimated ? {
+            value: d.avg_score || d.min_score,
+            year: d.year,
+            min: d.min_score,
+            max: d.max_score,
+            avg: d.avg_score
+        } : null;
+    });
+
+    // Compute the full series (connecting line through all points)
+    const fullSeries = data.map(function(d) {
+        return d.avg_score || d.min_score;
+    });
+
+    chart.setOption({
+        tooltip: {
+            trigger: 'axis',
+            backgroundColor: '#fff',
+            borderColor: '#E8E8F0',
+            borderWidth: 2,
+            textStyle: { color: '#333', fontSize: 13 },
+            formatter: function(params) {
+                var result = '<strong>' + params[0].axisValue + '</strong><br/>';
+                params.forEach(function(p) {
+                    if (p.value !== undefined && p.value !== null) {
+                        var marker = p.seriesName.indexOf('参考') >= 0
+                            ? '<span style="display:inline-block;width:8px;height:8px;border:2px dashed #FFB347;border-radius:50%;margin-right:6px;"></span>'
+                            : '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#6C5CE7;margin-right:6px;"></span>';
+                        var d = data[p.dataIndex];
+                        var lines = [];
+                        lines.push(marker + ' 进面分: <strong>' + p.value.toFixed(2) + '</strong>');
+                        if (d.min_score) lines.push('&nbsp;&nbsp;&nbsp;最低: ' + d.min_score.toFixed(2));
+                        if (d.max_score) lines.push('&nbsp;&nbsp;&nbsp;最高: ' + d.max_score.toFixed(2));
+                        if (d.avg_score) lines.push('&nbsp;&nbsp;&nbsp;平均: ' + d.avg_score.toFixed(2));
+                        if (d.is_estimated) lines.push('&nbsp;&nbsp;&nbsp;<span style=\"color:#E17055\">⚠️ 参考分</span>');
+                        return lines.join('<br/>');
+                    }
+                    return '';
+                }).filter(function(s) { return s.length > 0; }).join('<br/>');
+            }
+        },
+        grid: {
+            left: '8%',
+            right: '5%',
+            top: '10%',
+            bottom: '10%'
+        },
+        xAxis: {
+            type: 'category',
+            data: years,
+            boundaryGap: false,
+            axisLabel: {
+                color: '#636E72',
+                fontWeight: 600,
+                fontSize: 12
+            },
+            axisLine: { lineStyle: { color: '#E8E8F0' } },
+            axisTick: { alignWithLabel: true }
+        },
+        yAxis: {
+            type: 'value',
+            name: '进面分数',
+            nameTextStyle: { color: '#636E72', fontSize: 12 },
+            axisLabel: { color: '#636E72' },
+            splitLine: { lineStyle: { color: '#F0F0F5', type: 'dashed' } },
+            min: function(value) { return Math.floor(value.min - 3); },
+            max: function(value) { return Math.ceil(value.max + 3); }
+        },
+        series: [
+            {
+                name: '进面分',
+                type: 'line',
+                data: fullSeries,
+                smooth: 0.3,
+                lineStyle: { color: '#6C5CE7', width: 2.5 },
+                symbol: 'circle',
+                symbolSize: function(value, params) {
+                    if (data[params.dataIndex].is_estimated) return 8;
+                    return 10;
+                },
+                itemStyle: {
+                    color: function(params) {
+                        if (data[params.dataIndex].is_estimated) return '#fff';
+                        return '#6C5CE7';
+                    },
+                    borderColor: function(params) {
+                        if (data[params.dataIndex].is_estimated) return '#FFB347';
+                        return '#6C5CE7';
+                    },
+                    borderWidth: function(params) {
+                        if (data[params.dataIndex].is_estimated) return 2.5;
+                        return 0;
+                    }
+                },
+                markLine: {
+                    silent: true,
+                    symbol: 'none',
+                    lineStyle: { color: 'rgba(108,92,231,0.2)', type: 'dashed', width: 1 },
+                    data: [{
+                        type: 'average',
+                        name: '均值',
+                        label: {
+                            formatter: '均值 {c}',
+                            color: '#636E72',
+                            fontSize: 11
+                        }
+                    }]
+                },
+                areaStyle: {
+                    color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                        { offset: 0, color: 'rgba(108,92,231,0.12)' },
+                        { offset: 1, color: 'rgba(108,92,231,0.01)' }
+                    ])
+                },
+                z: 2
+            }
+        ]
+    });
+
+    return chart;
+}

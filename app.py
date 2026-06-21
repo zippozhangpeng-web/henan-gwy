@@ -15,6 +15,7 @@ from utils.query import (
     get_cities, get_years, get_system_types
 )
 from utils.scoring import get_score_detail
+from utils.volatility import get_position_volatility
 
 import json
 
@@ -145,7 +146,25 @@ def position_detail(position_id):
     else:
         scores = get_score_detail(pos)
 
-    return render_template('position_detail.html', pos=pos, scores=scores, scores_json=json.dumps(scores, ensure_ascii=False))
+    # 波动率分析
+    volatility = get_position_volatility(position_id)
+
+    # 将波动趋势融入难度分析
+    if volatility['has_enough_data'] and scores.get('difficulty_detail'):
+        v = volatility['volatility']
+        extra = f'该岗位近{len(volatility["scores"])}年进面分波动范围{v["lowest"]["value"]}-{v["highest"]["value"]}分'
+        if v['trend_type'] == '上升':
+            extra += '，呈上升趋势，竞争逐年加大。'
+        elif v['trend_type'] == '下降':
+            extra += '，呈下降趋势。'
+        elif v['trend_type'] == '震荡':
+            extra += '，呈震荡态势。'
+        else:
+            extra += '，分数稳定。'
+        scores['difficulty_detail'] = scores['difficulty_detail'] + ' ' + extra
+
+    return render_template('position_detail.html', pos=pos, scores=scores, volatility=volatility,
+                           scores_json=json.dumps(scores, ensure_ascii=False))
 
 
 def get_difficulty_label(score):
