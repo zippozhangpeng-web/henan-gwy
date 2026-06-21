@@ -170,7 +170,10 @@
                             <small class="text-muted">/ 10</small>
                         </div>
                     </div>
-                    <div id="mini-radar-{{ tp.id }}" style="height: 160px; margin-top: 0.5rem;"></div>
+                    <div class="score-summary mt-1">
+                        🎯{{ "%.1f"|format(tp.difficulty_score) }} &nbsp;📍{{ "%.1f"|format(tp.region_score) }} &nbsp;💰{{ "%.1f"|format(tp.salary_score) }} &nbsp;📈{{ "%.1f"|format(tp.prospect_score) }}
+                    </div>
+                    <div id="mini-radar-{{ tp.id }}" style="height: 160px; margin-top: 0.25rem;"></div>
                     <a href="/position/{{ tp.id }}" class="btn btn-sm btn-outline-custom w-100 mt-2">
                         查看详情 <i class="bi bi-arrow-right"></i>
                     </a>

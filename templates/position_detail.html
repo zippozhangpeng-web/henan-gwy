@@ -22,8 +22,11 @@
             <span class="badge bg-light text-dark me-2">{{ p.position_name }}</span>
             <span class="badge bg-warning text-dark me-2">招{{ p.recruit_num }}人</span>
             <span class="badge bg-info me-2">{{ p.education }}</span>
-            {% if p.min_score %}
-            <span class="badge bg-danger">进面最低分 {{ "%.2f"|format(p.min_score) }}</span>
+            {% if p.min_score and p.min_score > 0 %}
+            <span class="badge bg-danger me-1">进面最低分 {{ "%.2f"|format(p.min_score) }}</span>
+            {% if p.is_estimated %}
+            <span class="badge bg-warning text-dark">参考分</span>
+            {% endif %}
             {% endif %}
         </p>
     </div>
@@ -112,21 +115,35 @@
                     <i class="bi bi-graph-up"></i> 进面分数线
                 </div>
                 <div class="card-body">
+                    {% if pos.min_score and pos.min_score > 0 %}
                     <div id="chart-score-bar" style="height: 250px;"></div>
                     <div class="row text-center mt-2">
                         <div class="col-4">
                             <small class="text-muted">最低分</small><br>
-                            <strong class="text-success" style="font-size:1.3rem">{{ p.min_score or '-' }}</strong>
+                            <strong class="text-success" style="font-size:1.3rem">{{ "%.2f"|format(pos.min_score) }}</strong>
                         </div>
                         <div class="col-4">
                             <small class="text-muted">平均分</small><br>
-                            <strong class="text-primary" style="font-size:1.3rem">{{ "%.2f"|format(p.avg_score or 0) }}</strong>
+                            <strong class="text-primary" style="font-size:1.3rem">
+                                {% if pos.avg_score and pos.avg_score > 0 %}{{ "%.2f"|format(pos.avg_score) }}{% else %}-{% endif %}
+                            </strong>
                         </div>
                         <div class="col-4">
                             <small class="text-muted">最高分</small><br>
-                            <strong class="text-danger" style="font-size:1.3rem">{{ p.max_score or '-' }}</strong>
+                            <strong class="text-danger" style="font-size:1.3rem">
+                                {% if pos.max_score and pos.max_score > 0 %}{{ "%.2f"|format(pos.max_score) }}{% else %}-{% endif %}
+                            </strong>
                         </div>
                     </div>
+                    {% if pos.is_estimated %}
+                    <p class="text-muted small text-center mt-2 mb-0">* 参考分基于2025年同城市、同系统、同学历岗位数据估算</p>
+                    {% endif %}
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="bi bi-database-slash" style="font-size: 2rem; color: #ccc;"></i>
+                        <p class="text-muted mt-2">暂无进面分数数据</p>
+                    </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
@@ -171,11 +188,30 @@
                         <div class="score-value">{{ s.difficulty_score }}</div>
                         <div class="score-label">🎯 上岸难度</div>
                         <div>
-                            <span class="badge {% if s.difficulty_score >= 7 %}bg-danger{% elif s.difficulty_score >= 5 %}bg-warning text-dark{% else %}bg-success{% endif %} fs-6">
+                            <span class="badge {% if s.difficulty_score >= 7 %}bg-success{% elif s.difficulty_score >= 5 %}bg-warning text-dark{% else %}bg-danger{% endif %} fs-6">
                                 {{ s.difficulty_label }}
                             </span>
                         </div>
                         <div class="score-desc mt-2 text-start">{{ s.difficulty_detail }}</div>
+                        {% if s.difficulty_factors %}
+                        <div class="factor-toggle text-start" onclick="toggleFactor(this)">
+                            📋 评分依据（点击展开） <span class="arrow">▸</span>
+                        </div>
+                        <div class="factor-panel text-start">
+                            {% if s.difficulty_rule %}
+                            <div class="factor-rule">📐 {{ s.difficulty_rule }}</div>
+                            {% endif %}
+                            {% for f in s.difficulty_factors %}
+                            <div class="factor-item {% if f.name == '最终得分' %}factor-total{% endif %}">
+                                <span class="factor-name">{{ f.name }}</span>
+                                <span class="factor-value">{{ f.value }}</span>
+                                <span class="factor-impact {% if f.impact.startswith('+') %}positive{% elif f.impact.startswith('-') %}negative{% else %}neutral{% endif %}">
+                                    {{ f.impact }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 <!-- 地区优劣 -->
@@ -184,6 +220,25 @@
                         <div class="score-value">{{ s.region_score }}</div>
                         <div class="score-label">📍 地区优劣</div>
                         <div class="score-desc mt-2 text-start">{{ s.region_detail }}</div>
+                        {% if s.region_factors %}
+                        <div class="factor-toggle text-start" onclick="toggleFactor(this)">
+                            📋 评分依据（点击展开） <span class="arrow">▸</span>
+                        </div>
+                        <div class="factor-panel text-start">
+                            {% if s.region_rule %}
+                            <div class="factor-rule">📐 {{ s.region_rule }}</div>
+                            {% endif %}
+                            {% for f in s.region_factors %}
+                            <div class="factor-item {% if f.name == '最终得分' %}factor-total{% endif %}">
+                                <span class="factor-name">{{ f.name }}</span>
+                                <span class="factor-value">{{ f.value }}</span>
+                                <span class="factor-impact {% if f.impact.startswith('+') %}positive{% elif f.impact.startswith('-') %}negative{% else %}neutral{% endif %}">
+                                    {{ f.impact }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 <!-- 薪酬待遇 -->
@@ -192,6 +247,25 @@
                         <div class="score-value">{{ s.salary_score }}</div>
                         <div class="score-label">💰 薪酬待遇</div>
                         <div class="score-desc mt-2 text-start">{{ s.salary_detail }}</div>
+                        {% if s.salary_factors %}
+                        <div class="factor-toggle text-start" onclick="toggleFactor(this)">
+                            📋 评分依据（点击展开） <span class="arrow">▸</span>
+                        </div>
+                        <div class="factor-panel text-start">
+                            {% if s.salary_rule %}
+                            <div class="factor-rule">📐 {{ s.salary_rule }}</div>
+                            {% endif %}
+                            {% for f in s.salary_factors %}
+                            <div class="factor-item {% if f.name == '最终得分' %}factor-total{% endif %}">
+                                <span class="factor-name">{{ f.name }}</span>
+                                <span class="factor-value">{{ f.value }}</span>
+                                <span class="factor-impact {% if f.impact.startswith('+') %}positive{% elif f.impact.startswith('-') %}negative{% else %}neutral{% endif %}">
+                                    {{ f.impact }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 <!-- 发展前景 -->
@@ -200,6 +274,25 @@
                         <div class="score-value">{{ s.prospect_score }}</div>
                         <div class="score-label">📈 发展前景</div>
                         <div class="score-desc mt-2 text-start">{{ s.prospect_detail }}</div>
+                        {% if s.prospect_factors %}
+                        <div class="factor-toggle text-start" onclick="toggleFactor(this)">
+                            📋 评分依据（点击展开） <span class="arrow">▸</span>
+                        </div>
+                        <div class="factor-panel text-start">
+                            {% if s.prospect_rule %}
+                            <div class="factor-rule">📐 {{ s.prospect_rule }}</div>
+                            {% endif %}
+                            {% for f in s.prospect_factors %}
+                            <div class="factor-item {% if f.name == '最终得分' %}factor-total{% endif %}">
+                                <span class="factor-name">{{ f.name }}</span>
+                                <span class="factor-value">{{ f.value }}</span>
+                                <span class="factor-impact {% if f.impact.startswith('+') %}positive{% elif f.impact.startswith('-') %}negative{% else %}neutral{% endif %}">
+                                    {{ f.impact }}
+                                </span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -238,9 +331,24 @@
 
 {% block extra_scripts %}
 <script>
+function toggleFactor(el) {
+    el.classList.toggle('open');
+    var panel = el.nextElementSibling;
+    if (panel) panel.classList.toggle('show');
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     initRadarChart('chart-radar', JSON.parse('{{ scores_json | safe }}'));
-    initScoreBar('chart-score-bar', {{ "%.2f"|format(pos.min_score or 0) }}, {{ "%.2f"|format(pos.max_score or 0) }}, {{ "%.2f"|format(pos.avg_score or 0) }});
+{% if pos.min_score and pos.min_score > 0 %}
+    var min = {{ "%.2f"|format(pos.min_score) }};
+    var max = {{ "%.2f"|format(pos.max_score or 0) }};
+    var avg = {{ "%.2f"|format(pos.avg_score or 0) }};
+    if (max <= 0 || avg <= 0) {
+        initScoreBarSingle('chart-score-bar', min);
+    } else {
+        initScoreBar('chart-score-bar', min, max, avg);
+    }
+{% endif %}
 });
 </script>
 {% endblock %}

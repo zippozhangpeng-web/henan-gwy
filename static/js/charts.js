@@ -395,6 +395,32 @@ function initScoreBar(elementId, minScore, maxScore, avgScore) {
     return chart;
 }
 
+// ========== 单柱图（仅估算分）==========
+
+function initScoreBarSingle(elementId, minScore) {
+    const chart = echarts.init(document.getElementById(elementId));
+    chart.setOption({
+        tooltip: { trigger: 'axis' },
+        xAxis: { type: 'category', data: ['参考进面分'], axisLabel: { color: '#636E72', fontWeight: 600 } },
+        yAxis: { type: 'value', name: '分数', min: 40, max: 90, splitLine: { lineStyle: { type: 'dashed' } } },
+        series: [{
+            type: 'bar',
+            data: [{ value: minScore, itemStyle: { color: '#FFB347', borderRadius: [8,8,0,0] } }],
+            barWidth: '40%',
+            label: { show: true, position: 'top', fontWeight: 'bold', fontSize: 14, formatter: function(p) { return p.value.toFixed(2); } }
+        }]
+    });
+    chart.setOption({
+        graphic: [{
+            type: 'text',
+            left: 'center',
+            top: 10,
+            style: { text: '⚠️ 参考数据（基于2025年同维度均值估算）', fill: '#999', fontSize: 11 }
+        }]
+    });
+    return chart;
+}
+
 // ========== 全局分析页 - 分数分布 ==========
 
 function initScoreDistribution(elementId, data) {

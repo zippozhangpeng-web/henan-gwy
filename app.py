@@ -119,15 +119,29 @@ def position_detail(position_id):
             'difficulty_score': s['difficulty_score'] or 5.0,
             'difficulty_label': get_difficulty_label(s['difficulty_score'] or 5.0),
             'difficulty_detail': s['difficulty_detail'] or '',
+            'difficulty_factors': s.get('difficulty_factors') or [],
+            'difficulty_rule': s.get('difficulty_rule', ''),
             'region_score': s['region_score'] or 5.0,
             'region_detail': s['region_detail'] or '',
+            'region_factors': s.get('region_factors') or [],
+            'region_rule': s.get('region_rule', ''),
             'salary_score': s['salary_score'] or 5.0,
             'salary_detail': s['salary_detail'] or '',
+            'salary_factors': s.get('salary_factors') or [],
+            'salary_rule': s.get('salary_rule', ''),
             'prospect_score': s['prospect_score'] or 5.0,
             'prospect_detail': s['prospect_detail'] or '',
+            'prospect_factors': s.get('prospect_factors') or [],
+            'prospect_rule': s.get('prospect_rule', ''),
             'overall_score': s['overall_score'] or 5.0,
             'city_data': get_score_detail(pos)['city_data']
         }
+        # 如果DB中factors为空，动态补充
+        if not scores['difficulty_factors']:
+            fresh = get_score_detail(pos)
+            for dim in ['difficulty', 'region', 'salary', 'prospect']:
+                scores[f'{dim}_factors'] = fresh.get(f'{dim}_factors', [])
+                scores[f'{dim}_rule'] = fresh.get(f'{dim}_rule', '')
     else:
         scores = get_score_detail(pos)
 
@@ -136,10 +150,10 @@ def position_detail(position_id):
 
 def get_difficulty_label(score):
     if score >= 7:
-        return '🔴 困难'
+        return '🟢 容易'
     elif score >= 5:
         return '🟡 中等'
-    return '🟢 容易'
+    return '🔴 困难'
 
 
 @app.route('/analysis')
@@ -165,6 +179,43 @@ def analysis():
 def about():
     """关于页面"""
     return render_template('about.html')
+
+
+@app.route('/api/position/<int:position_id>/scores')
+def api_position_scores(position_id):
+    """API: 获取岗位评分详情（含因子明细）"""
+    detail = get_position_detail(position_id)
+    if not detail:
+        return jsonify({'error': '岗位不存在'}), 404
+    
+    pos = detail['position']
+    if detail['scores']:
+        s = detail['scores']
+        # 如果DB中没有factors，动态生成
+        if not s.get('difficulty_factors'):
+            fresh = get_score_detail(pos)
+        else:
+            fresh = None
+        
+        scores = {
+            'difficulty_score': s['difficulty_score'] or 5.0,
+            'difficulty_label': get_difficulty_label(s['difficulty_score'] or 5.0),
+            'difficulty_factors': s.get('difficulty_factors') or (fresh['difficulty_factors'] if fresh else []),
+            'difficulty_rule': s.get('difficulty_rule') or (fresh['difficulty_rule'] if fresh else ''),
+            'region_score': s['region_score'] or 5.0,
+            'region_factors': s.get('region_factors') or (fresh['region_factors'] if fresh else []),
+            'region_rule': s.get('region_rule') or (fresh['region_rule'] if fresh else ''),
+            'salary_score': s['salary_score'] or 5.0,
+            'salary_factors': s.get('salary_factors') or (fresh['salary_factors'] if fresh else []),
+            'salary_rule': s.get('salary_rule') or (fresh['salary_rule'] if fresh else ''),
+            'prospect_score': s['prospect_score'] or 5.0,
+            'prospect_factors': s.get('prospect_factors') or (fresh['prospect_factors'] if fresh else []),
+            'prospect_rule': s.get('prospect_rule') or (fresh['prospect_rule'] if fresh else ''),
+            'overall_score': s['overall_score'] or 5.0,
+        }
+    else:
+        scores = get_score_detail(pos)
+    return jsonify(scores)
 
 
 @app.errorhandler(404)

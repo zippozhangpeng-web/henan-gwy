@@ -74,13 +74,13 @@ def calculate_difficulty(position):
     elif recruit_num >= 5:
         score -= 1.0
 
-    # 基于进面分数
+    # 基于进面分数（高分→难上岸→减分，低分→易上岸→加分）
     if min_score > 68:
-        score += 2.0
+        score -= 2.0
     elif min_score > 63:
-        score += 1.0
-    elif min_score < 55:
         score -= 1.0
+    elif min_score < 55:
+        score += 1.0
 
     # 学历要求
     if '硕士' in education:
@@ -176,7 +176,7 @@ def calculate_prospect(position):
 
 
 def get_score_detail(position):
-    """获取完整四维评分详情"""
+    """获取完整四维评分详情，包含评分因子明细"""
     difficulty = calculate_difficulty(position)
     region = calculate_region(position)
     salary = calculate_salary(position)
@@ -186,21 +186,209 @@ def get_score_detail(position):
     city = position.get('city', '郑州')
     sys_type = position.get('system_type', '')
     district = position.get('district', '')
+    education = position.get('education', '本科及以上')
+    political = position.get('political_status', '不限')
+    recruit_num = position.get('recruit_num') or 1
     min_score = position.get('min_score') or 0
     max_score = position.get('max_score') or 0
     avg_score = position.get('avg_score') or 0
     city_data = CITY_DATA.get(city, CITY_DATA['郑州'])
 
-    # 难度分析
+    # ========================================
+    # 上岸难度 — 评分因子
+    # ========================================
+    difficulty_rule = "基准线5.0，城市竞争力强→加分(竞争大但岗位好)，招录人数少→减分(难上岸)，进面分高→减分(越难上岸)，学历门槛高→加分(竞争小)，政治面貌有限制→加分(竞争小)"
+
+    diff_factors = []
+    diff_sum = 5.0
+    diff_factors.append({'name': '基础分（基准线）', 'value': '5.0', 'impact': '+5.0'})
+
+    # 城市因子
+    if city == '郑州':
+        diff_factors.append({'name': '城市竞争力', 'value': f'{city}是省会城市', 'impact': '+2.0'})
+        diff_sum += 2.0
+    elif city in ['洛阳', '南阳', '新乡']:
+        diff_factors.append({'name': '城市竞争力', 'value': f'{city}为区域中心城市', 'impact': '+1.0'})
+        diff_sum += 1.0
+    else:
+        diff_factors.append({'name': '城市竞争力', 'value': f'{city}', 'impact': '+0.0'})
+
+    # 招录人数因子
+    if recruit_num == 1:
+        diff_factors.append({'name': '招录人数', 'value': f'仅招{recruit_num}人', 'impact': '+1.5'})
+        diff_sum += 1.5
+    elif recruit_num == 2:
+        diff_factors.append({'name': '招录人数', 'value': f'招{recruit_num}人', 'impact': '+0.5'})
+        diff_sum += 0.5
+    elif recruit_num >= 5:
+        diff_factors.append({'name': '招录人数', 'value': f'招{recruit_num}人（较多）', 'impact': '-1.0'})
+        diff_sum -= 1.0
+    else:
+        diff_factors.append({'name': '招录人数', 'value': f'招{recruit_num}人', 'impact': '+0.0'})
+
+    # 进面分数因子
+    if min_score and min_score > 0:
+        if min_score > 68:
+            diff_factors.append({'name': '进面分数', 'value': f'最低{min_score}分（高分段）', 'impact': '-2.0'})
+            diff_sum -= 2.0
+        elif min_score > 63:
+            diff_factors.append({'name': '进面分数', 'value': f'最低{min_score}分（中高分段）', 'impact': '-1.0'})
+            diff_sum -= 1.0
+        elif min_score < 55:
+            diff_factors.append({'name': '进面分数', 'value': f'最低{min_score}分（偏低）', 'impact': '+1.0'})
+            diff_sum += 1.0
+        else:
+            diff_factors.append({'name': '进面分数', 'value': f'最低{min_score}分', 'impact': '+0.0'})
+    else:
+        diff_factors.append({'name': '进面分数', 'value': '暂无数据', 'impact': '+0.0'})
+
+    # 学历因子
+    if '硕士' in education:
+        diff_factors.append({'name': '学历要求', 'value': education, 'impact': '-0.5'})
+        diff_sum -= 0.5
+    elif '大专' in education:
+        diff_factors.append({'name': '学历要求', 'value': education, 'impact': '+1.0'})
+        diff_sum += 1.0
+    else:
+        diff_factors.append({'name': '学历要求', 'value': education, 'impact': '+0.0'})
+
+    # 政治面貌因子
+    if political != '不限':
+        diff_factors.append({'name': '政治面貌', 'value': political, 'impact': '-0.5'})
+        diff_sum -= 0.5
+    else:
+        diff_factors.append({'name': '政治面貌', 'value': '不限', 'impact': '+0.0'})
+
+    # 截断说明
+    if diff_sum > 10:
+        diff_factors.append({'name': '截断调整', 'value': f'原始合计{diff_sum:.1f}，截断至10', 'impact': f'-{diff_sum - 10:.1f}'})
+    diff_factors.append({'name': '最终得分', 'value': f'{difficulty}', 'impact': ''})
+
+    # ========================================
+    # 地区优劣 — 评分因子
+    # ========================================
+    region_rule = "基于城市GDP排名确定基础分（省会9.5→区域中心8.0→第3-6名7.0→第7-10名6.0→第11-14名5.5→其他5.0）"
+
+    region_factors = []
+    region_factors.append({
+        'name': 'GDP排名',
+        'value': f'全省第{city_data["gdp_rank"]}位（GDP {city_data["gdp"]}亿）',
+        'impact': '-'
+    })
+    region_factors.append({
+        'name': '人均薪资',
+        'value': f'{city_data["avg_salary"]}元/月',
+        'impact': '-'
+    })
+    region_factors.append({
+        'name': '房价水平',
+        'value': f'{city_data["house_price"]}元/㎡',
+        'impact': '-'
+    })
+    is_capital = city_data.get('is_capital', False)
+    region_factors.append({
+        'name': '是否为省会',
+        'value': '是' if is_capital else '否',
+        'impact': '+' if is_capital else '-'
+    })
+    region_factors.append({
+        'name': '最终得分',
+        'value': f'{region}',
+        'impact': ''
+    })
+
+    # ========================================
+    # 薪酬待遇 — 评分因子
+    # ========================================
+    salary_rule = "城市平均薪资(千元)为底分 + 系统加成(公安+0.8/法检+0.7/核心+0.5) + 层级加成(省直+0.5/市直+0.3)，满分截断至10"
+
+    base_salary = city_data['avg_salary'] / 1000
+    salary_factors = []
+    salary_factors.append({
+        'name': '城市平均薪资',
+        'value': f'{city_data["avg_salary"]}元/月',
+        'impact': f'{base_salary:.1f}'
+    })
+
+    sys_bonus = 0.0
+    if '公安' in sys_type:
+        sys_bonus = 0.8
+        salary_factors.append({'name': '系统加成', 'value': '公安系统津贴', 'impact': '+0.8'})
+    elif '法院' in sys_type or '检察' in sys_type:
+        sys_bonus = 0.7
+        salary_factors.append({'name': '系统加成', 'value': '法检系统津贴', 'impact': '+0.7'})
+    elif sys_type in ['纪委监委', '财政局', '发改委']:
+        sys_bonus = 0.5
+        salary_factors.append({'name': '系统加成', 'value': f'{sys_type}津贴', 'impact': '+0.5'})
+    else:
+        salary_factors.append({'name': '系统加成', 'value': sys_type or '无', 'impact': '+0.0'})
+
+    district_bonus = 0.0
+    if district == '省直':
+        district_bonus = 0.5
+        salary_factors.append({'name': '层级加成', 'value': '省直机关', 'impact': '+0.5'})
+    elif district == '市直':
+        district_bonus = 0.3
+        salary_factors.append({'name': '层级加成', 'value': '市直机关', 'impact': '+0.3'})
+    else:
+        salary_factors.append({'name': '层级加成', 'value': district or '县级', 'impact': '+0.0'})
+
+    salary_factors.append({'name': '最终得分', 'value': f'{salary}', 'impact': ''})
+
+    # ========================================
+    # 发展前景 — 评分因子
+    # ========================================
+    prospect_rule = "系统类型确定基础分(核心部门8.5→政法7.5→乡镇4.0→其他6.0) + 层级加成(省直+1.2/市直+0.8/县级-0.5) + 城市加成(郑州+0.5/洛阳+0.3)"
+
+    # 确定 base
+    if sys_type in ['党委系统', '政府办公室', '纪委监委', '发改委', '组织部', '宣传部']:
+        prosp_base = 8.5
+        prosp_base_label = f'核心部门({sys_type})'
+    elif sys_type in ['公安系统', '法院系统', '检察院系统', '财政局']:
+        prosp_base = 7.5
+        prosp_base_label = f'政法财系统({sys_type})'
+    elif '乡镇' in sys_type:
+        prosp_base = 4.0
+        prosp_base_label = f'基层岗位({sys_type})'
+    else:
+        prosp_base = 6.0
+        prosp_base_label = sys_type or '普通部门'
+
+    prospect_factors = []
+    prospect_factors.append({
+        'name': '部门权重',
+        'value': prosp_base_label,
+        'impact': f'{prosp_base:.1f}'
+    })
+
+    if district == '省直':
+        prospect_factors.append({'name': '层级加成', 'value': '省直机关', 'impact': '+1.2'})
+    elif district == '市直':
+        prospect_factors.append({'name': '层级加成', 'value': '市直机关', 'impact': '+0.8'})
+    else:
+        prospect_factors.append({'name': '层级加成', 'value': district or '县级', 'impact': '-0.5'})
+
+    if city == '郑州':
+        prospect_factors.append({'name': '城市加成', 'value': '省会城市', 'impact': '+0.5'})
+    elif city == '洛阳':
+        prospect_factors.append({'name': '城市加成', 'value': '副中心城市', 'impact': '+0.3'})
+    else:
+        prospect_factors.append({'name': '城市加成', 'value': city, 'impact': '+0.0'})
+
+    prospect_factors.append({'name': '最终得分', 'value': f'{prospect}', 'impact': ''})
+
+    # ========================================
+    # 难度标签和描述
+    # ========================================
     if difficulty >= 8:
-        diff_label = '🔴 困难'
-        diff_desc = '竞争非常激烈，建议充分备考，关注同类岗位分散风险。'
+        diff_label = '🟢 容易'
+        diff_desc = '上岸难度较低，进面分数线相对友好，性价比较高。'
     elif difficulty >= 6:
         diff_label = '🟡 中等'
-        diff_desc = '有一定竞争压力，认真准备有望上岸。'
+        diff_desc = '难度适中，有一定竞争压力，认真备考有望上岸。'
     else:
-        diff_label = '🟢 容易'
-        diff_desc = '难度相对较低，上岸机会较大，是性价比较高的选择。'
+        diff_label = '🔴 困难'
+        diff_desc = '竞争较激烈，进面分数线较高，建议充分备考。'
 
     difficulty_detail = (
         f"进面分数区间：{min_score}-{max_score}分（平均{avg_score}分）。"
@@ -239,7 +427,7 @@ def get_score_detail(position):
         prospect_detail = f"{city}市级单位，发展空间良好。"
     else:
         prospect_detail = f"{city}区县/基层单位，"
-    if sys_type in ['党委系统','政府办公室','纪委监委','发改委']:
+    if sys_type in ['党委系统', '政府办公室', '纪委监委', '发改委']:
         prospect_detail += "核心部门，接触面广，晋升通道畅通。"
     elif '乡镇' in sys_type:
         prospect_detail += "基层岗位，锻炼机会多，晋升需较长时间积累。"
@@ -250,12 +438,20 @@ def get_score_detail(position):
         'difficulty_score': difficulty,
         'difficulty_label': diff_label,
         'difficulty_detail': difficulty_detail,
+        'difficulty_factors': diff_factors,
+        'difficulty_rule': difficulty_rule,
         'region_score': region,
         'region_detail': region_detail,
+        'region_factors': region_factors,
+        'region_rule': region_rule,
         'salary_score': salary,
         'salary_detail': salary_detail,
+        'salary_factors': salary_factors,
+        'salary_rule': salary_rule,
         'prospect_score': prospect,
         'prospect_detail': prospect_detail,
+        'prospect_factors': prospect_factors,
+        'prospect_rule': prospect_rule,
         'overall_score': overall,
         'city_data': {
             'name': city,
