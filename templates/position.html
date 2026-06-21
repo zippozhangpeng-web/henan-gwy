@@ -229,6 +229,10 @@
 
 {% endblock %}
 
+{% block page_charts %}
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<script src="/static/js/charts.js"></script>
+{% endblock %}
 {% block extra_scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {

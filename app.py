@@ -6,6 +6,7 @@ import os
 import sys
 import sqlite3
 from flask import Flask, render_template, request, jsonify
+from flask_compress import Compress
 
 # Add project root to path
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -21,6 +22,22 @@ import json
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'henan-gwy-secret-2026'
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 86400  # 静态文件缓存 1 天
+app.config['COMPRESS_ALGORITHM'] = 'gzip'
+app.config['COMPRESS_LEVEL'] = 6
+app.config['COMPRESS_MIN_SIZE'] = 500
+Compress(app)
+
+# 为静态文件添加强缓存头
+@app.after_request
+def add_cache_headers(response):
+    if response.content_type and 'text/css' in response.content_type:
+        response.headers['Cache-Control'] = 'public, max-age=86400'
+    elif response.content_type and 'application/javascript' in response.content_type:
+        response.headers['Cache-Control'] = 'public, max-age=86400'
+    elif response.content_type and 'image/' in response.content_type:
+        response.headers['Cache-Control'] = 'public, max-age=604800'  # 图片缓存 7 天
+    return response
 
 
 def init_leads_table():
