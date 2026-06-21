@@ -759,3 +759,111 @@ body {
 }
 .score-tooltip .tt-label { font-weight: 600; color: var(--text); }
 .score-tooltip .tt-value { font-weight: 800; color: var(--primary); }
+
+/* ===== 好风品牌主页 ===== */
+
+/* 特色卡片 */
+.brand-feature-card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+  transition: all 0.4s ease;
+  border: 2px solid transparent;
+}
+.brand-feature-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--primary-light);
+}
+.brand-feature-card .feature-icon { font-size: 2.5rem; margin-bottom: 0.8rem; }
+.brand-feature-card .feature-title { font-weight: 800; color: var(--primary); font-size: 1.05rem; margin-bottom: 0.5rem; }
+.brand-feature-card .feature-desc { color: var(--text-light); font-size: 0.85rem; line-height: 1.6; }
+
+/* 可点击的特色卡片 */
+.brand-feature-card-link { color: inherit; cursor: pointer; }
+.brand-feature-card-link:hover { color: inherit; }
+
+/* 特色卡片行 */
+.features-row {
+  margin-top: -2rem;
+  position: relative;
+  z-index: 10;
+}
+
+/* Hero 按钮 */
+.btn-hero {
+  font-weight: 700;
+  padding: 0.9rem 2.8rem;
+  border-radius: var(--radius-sm);
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+.btn-hero-primary {
+  background: #fff;
+  color: var(--primary);
+  border: 2px solid #fff;
+}
+.btn-hero-primary:hover {
+  background: rgba(255,255,255,0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  color: var(--primary-dark);
+}
+.btn-hero-outline {
+  background: transparent;
+  color: #fff;
+  border: 2px solid rgba(255,255,255,0.7);
+}
+.btn-hero-outline:hover {
+  background: rgba(255,255,255,0.15);
+  border-color: #fff;
+  transform: translateY(-2px);
+  color: #fff;
+}
+
+/* 区块标题 */
+.section-heading {
+  font-weight: 800;
+  color: var(--primary);
+  text-align: center;
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+/* 登记表单 */
+.lead-form-section {
+  background: linear-gradient(135deg, #FF6B35 0%, #FF8C5A 100%);
+  border-radius: var(--radius);
+  padding: 2.5rem;
+  color: #fff;
+}
+.lead-form-section .form-control,
+.lead-form-section .form-select {
+  border-radius: var(--radius-sm);
+  border: 2px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.95);
+  padding: 0.7rem 1rem;
+  font-size: 0.95rem;
+}
+.lead-form-section .form-control:focus,
+.lead-form-section .form-select:focus {
+  border-color: #fff;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+}
+.lead-form-section .btn-submit {
+  background: #fff;
+  color: var(--primary);
+  border: none;
+  font-weight: 800;
+  padding: 0.8rem 3rem;
+  border-radius: var(--radius-sm);
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+}
+.lead-form-section .btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}

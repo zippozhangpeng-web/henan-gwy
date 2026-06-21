@@ -23,6 +23,25 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'henan-gwy-secret-2026'
 
 
+def init_leads_table():
+    """初始化学员意向登记表"""
+    db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gwy_data.db')
+    conn = sqlite3.connect(db_path)
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS leads (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            city TEXT,
+            position_type TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            status TEXT DEFAULT 'new'
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+
 @app.route('/health')
 def health():
     return {"status": "ok", "name": "好风公考情报站"}
@@ -237,6 +256,34 @@ def api_position_scores(position_id):
     return jsonify(scores)
 
 
+@app.route('/api/lead', methods=['POST'])
+def api_lead():
+    """API: 学员意向登记"""
+    try:
+        data = request.get_json(force=True)
+        name = (data.get('name') or '').strip()
+        phone = (data.get('phone') or '').strip()
+        city = (data.get('city') or '').strip()
+        position_type = (data.get('position_type') or '').strip()
+
+        if not name or not phone:
+            return jsonify({'status': 'error', 'message': '姓名和电话为必填项'}), 400
+
+        db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'gwy_data.db')
+        conn = sqlite3.connect(db_path)
+        conn.execute(
+            'INSERT INTO leads (name, phone, city, position_type) VALUES (?, ?, ?, ?)',
+            (name, phone, city, position_type)
+        )
+        conn.commit()
+        conn.close()
+
+        return jsonify({'status': 'ok', 'message': '已收到您的咨询，我们将在24小时内与您联系'})
+    except Exception as e:
+        print(f"学员登记异常: {e}")
+        return jsonify({'status': 'error', 'message': '服务器错误，请稍后重试'}), 500
+
+
 @app.errorhandler(404)
 def not_found(e):
     return render_template('base.html', content='页面不存在'), 404
@@ -284,6 +331,9 @@ if __name__ == '__main__':
             sp = os.path.join(root_dir, script)
             if os.path.exists(sp):
                 subprocess.run([sys.executable, script], cwd=root_dir)
+
+    # 初始化学员意向登记表
+    init_leads_table()
 
     print("=" * 60)
     print("🏛️  河南公考岗位情报站")

@@ -1,250 +1,228 @@
 {% extends "base.html" %}
-{% block title %}河南公考岗位情报站 - 首页{% endblock %}
+{% block title %}好风公考 — 精品公考培训 | 数据驱动选岗{% endblock %}
 {% block content %}
 
 <!-- Hero -->
 <div class="hero-section">
-    <div class="container">
-        <h1><span class="gold-text">数据驱动</span> 科学选岗</h1>
-        <p>收录河南省近5年公务员考试岗位数据 · 四维雷达分析 · 上岸难度评估</p>
+    <div class="container text-center">
+        <h1>好风公考</h1>
+        <p class="subtitle">送你上青云 🚀</p>
+        <p class="mb-2" style="font-size:1rem;opacity:0.85;">精品化 · 全上岸 · 高性价比 · 模块化</p>
+        <div class="mt-4">
+            <a href="/search" class="btn btn-hero btn-hero-primary me-3">
+                <i class="bi bi-compass"></i> 进入情报站
+            </a>
+            <a href="#lead-form" class="btn btn-hero btn-hero-outline">
+                <i class="bi bi-chat-dots"></i> 免费咨询
+            </a>
+        </div>
     </div>
 </div>
 
-<!-- Stats -->
-<div class="container stats-row">
-    <div class="row g-3">
+<!-- 机构特色卡片 -->
+<div class="container features-row">
+    <div class="row g-4">
+        <div class="col-6 col-md">
+            <div class="brand-feature-card">
+                <div class="feature-icon">🎯</div>
+                <div class="feature-title">精品化·小而美</div>
+                <div class="feature-desc">每期仅收15人，1v1选岗+全程督学，不做流水线大班</div>
+            </div>
+        </div>
+        <div class="col-6 col-md">
+            <div class="brand-feature-card">
+                <div class="feature-icon">👨‍🏫</div>
+                <div class="feature-title">全上岸经历师资</div>
+                <div class="feature-desc">所有讲师均高分上岸公考，实战经验丰富，拒绝纸上谈兵</div>
+            </div>
+        </div>
+        <div class="col-6 col-md">
+            <div class="brand-feature-card">
+                <div class="feature-icon">💰</div>
+                <div class="feature-title">最具性价比</div>
+                <div class="feature-desc">同品质课程价格仅为市场均价的60%，支持分期付款</div>
+            </div>
+        </div>
+        <div class="col-6 col-md">
+            <div class="brand-feature-card">
+                <div class="feature-icon">🧩</div>
+                <div class="feature-title">模块化·自由选</div>
+                <div class="feature-desc">行测、申论、面试按模块报名，只为你需要的付费</div>
+            </div>
+        </div>
+        <div class="col-6 col-md">
+            <a href="/search" class="text-decoration-none brand-feature-card brand-feature-card-link d-block">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">数据驱动选岗</div>
+                <div class="feature-desc">5年河南省考大数据，四维评分精准匹配 <i class="bi bi-arrow-right"></i></div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- 情报站集锦 -->
+<div class="container mt-5">
+    <h3 class="section-heading"><i class="bi bi-compass"></i> 公考情报站 — 数据选岗利器</h3>
+
+    <!-- 统计数字 -->
+    <div class="row g-3 mt-3">
         <div class="col-6 col-md-3">
             <div class="stat-card">
-                <div class="stat-icon">📋</div><div class="stat-number">{{ stats.total_positions }}</div>
-                <div class="stat-label">📋 收录岗位</div>
+                <div class="stat-icon">📋</div>
+                <div class="stat-number">{{ stats.total_positions }}</div>
+                <div class="stat-label">收录岗位</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
             <div class="stat-card">
-                <div class="stat-icon">👥</div><div class="stat-number">{{ stats.total_recruit }}</div>
-                <div class="stat-label">👥 招录人数</div>
+                <div class="stat-icon">👥</div>
+                <div class="stat-number">{{ stats.total_recruit }}</div>
+                <div class="stat-label">招录人数</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
             <div class="stat-card">
                 <div class="stat-number">18</div>
-                <div class="stat-label">🏙️ 覆盖地市</div>
+                <div class="stat-label">覆盖地市</div>
             </div>
         </div>
         <div class="col-6 col-md-3">
             <div class="stat-card">
                 <div class="stat-number">5年</div>
-                <div class="stat-label">📅 数据年份</div>
+                <div class="stat-label">数据年份</div>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Search Section -->
-<div class="container mt-5">
-    <div class="search-form fade-in-up">
-        <h4 class="mb-3" style="color: var(--primary);">
-            <i class="bi bi-search"></i> 岗位智能检索
-        </h4>
-        <form action="/search" method="GET">
-            <div class="row g-3">
-                <div class="col-md-4">
-                    <label class="form-label">毕业年份</label>
-                    <select class="form-select" name="year">
-                        <option value="all">全部年份</option>
-                        {% for y in years %}
-                        <option value="{{ y }}">{{ y }}年</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">专业</label>
-                    <input type="text" class="form-control" name="major" placeholder="如：法学、计算机...">
-                </div>
-                <div class="col-md-4">
-                    <label class="form-label">学历</label>
-                    <select class="form-select" name="education">
-                        <option value="">不限</option>
-                        <option value="大专">大专及以上</option>
-                        <option value="本科">本科及以上</option>
-                        <option value="硕士">硕士研究生及以上</option>
-                    </select>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">意向地市</label>
-                    <div class="d-flex flex-wrap gap-1" id="citySelector">
-                        {% for c in cities %}
-                        <span class="city-pill" data-city="{{ c.city }}">{{ c.city }}</span>
-                        {% endfor %}
-                    </div>
-                    <input type="hidden" name="cities" id="citiesInput">
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">政治面貌</label>
-                    <select class="form-select" name="political">
-                        <option value="">不限</option>
-                        <option value="不限">不限</option>
-                        <option value="中共党员">中共党员</option>
-                        <option value="中共党员或共青团员">中共党员或共青团员</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <label class="form-label">基层经历</label>
-                    <select class="form-select" name="experience">
-                        <option value="">不限</option>
-                        <option value="不限">不限</option>
-                        <option value="2年以上基层工作经历">2年以上基层</option>
-                    </select>
-                </div>
-                <div class="col-12 text-center mt-3">
-                    <button type="submit" class="btn btn-search btn-lg px-5">
-                        <i class="bi bi-search"></i> 开始搜索
-                    </button>
-                </div>
+    <!-- 快速搜索入口（简化版） -->
+    <div class="search-form fade-in-up mt-4">
+        <h5 class="mb-3" style="color: var(--primary);">
+            <i class="bi bi-search"></i> 快速检索岗位
+        </h5>
+        <form action="/search" method="GET" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">毕业年份</label>
+                <select class="form-select" name="year">
+                    <option value="all">全部年份</option>
+                    {% for y in years %}
+                    <option value="{{ y }}">{{ y }}年</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">专业</label>
+                <input type="text" class="form-control" name="major" placeholder="如：法学、计算机...">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">学历</label>
+                <select class="form-select" name="education">
+                    <option value="">不限</option>
+                    <option value="大专">大专及以上</option>
+                    <option value="本科">本科及以上</option>
+                    <option value="硕士">硕士研究生及以上</option>
+                </select>
+            </div>
+            <div class="col-12 text-center">
+                <button type="submit" class="btn btn-search btn-lg px-5">
+                    <i class="bi bi-search"></i> 开始搜索
+                </button>
             </div>
         </form>
     </div>
-</div>
 
-<!-- Charts -->
-<div class="container mt-5">
-    <div class="row g-4">
-        <div class="col-lg-6">
-            <div class="chart-card fade-in-up">
-                <h5><i class="bi bi-bar-chart"></i> 各地市岗位分布</h5>
-                <div id="chart-cities" style="height: 350px;"></div>
-            </div>
+    <!-- 推荐岗位 TOP6 -->
+    {% if stats.top_positions %}
+    <div class="mt-5">
+        <div class="d-flex align-items-center mb-3">
+            <h4 class="mb-0" style="color: var(--primary); font-weight: 800;">
+                <i class="bi bi-star-fill"></i> 推荐岗位
+            </h4>
+            <span class="ms-2 badge bg-primary">综合评分 TOP6</span>
         </div>
-        <div class="col-lg-6">
-            <div class="chart-card fade-in-up">
-                <h5><i class="bi bi-graph-up"></i> 历年招录趋势</h5>
-                <div id="chart-year-trend" style="height: 350px;"></div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="chart-card fade-in-up">
-                <h5><i class="bi bi-pie-chart"></i> 系统类别分布</h5>
-                <div id="chart-system" style="height: 350px;"></div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="chart-card fade-in-up">
-                <h5><i class="bi bi-pie-chart"></i> 学历要求分布</h5>
-                <div id="chart-edu" style="height: 350px;"></div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- 推荐岗位 -->
-{% if stats.top_positions %}
-<div class="container mt-5">
-    <div class="d-flex align-items-center mb-3">
-        <h4 class="mb-0" style="color: var(--primary); font-weight: 800;">
-            <i class="bi bi-star-fill"></i> 推荐岗位
-        </h4>
-        <span class="ms-2 badge bg-primary">综合评分 TOP6</span>
-    </div>
-    <div class="row g-3">
-        {% for tp in stats.top_positions %}
-        <div class="col-md-6 col-lg-4">
-            <div class="card recommend-card fade-in-up h-100">
-                <div class="card-body p-3">
-                    <div class="d-flex align-items-start">
-                        <div class="flex-grow-1 min-width-0">
-                            <h6 class="card-title mb-1 text-truncate" title="{{ tp.unit }}">
-                                <a href="/position/{{ tp.id }}" class="text-decoration-none" style="color: var(--text);">
-                                    {{ tp.unit }}
-                                </a>
-                            </h6>
-                            <p class="card-text mb-1">
-                                <small class="text-muted">{{ tp.position_name }}</small>
-                            </p>
-                            <p class="mb-0">
-                                <span class="badge bg-info me-1">{{ tp.city }}</span>
-                                <span class="badge bg-secondary">{{ tp.education }}</span>
-                            </p>
+        <div class="row g-3">
+            {% for tp in stats.top_positions %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card recommend-card fade-in-up h-100">
+                    <div class="card-body p-3">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-grow-1 min-width-0">
+                                <h6 class="card-title mb-1 text-truncate" title="{{ tp.unit }}">
+                                    <a href="/position/{{ tp.id }}" class="text-decoration-none" style="color: var(--text);">
+                                        {{ tp.unit }}
+                                    </a>
+                                </h6>
+                                <p class="card-text mb-1">
+                                    <small class="text-muted">{{ tp.position_name }}</small>
+                                </p>
+                                <p class="mb-0">
+                                    <span class="badge bg-info me-1">{{ tp.city }}</span>
+                                    <span class="badge bg-secondary">{{ tp.education }}</span>
+                                </p>
+                            </div>
+                            <div class="text-end ms-2 flex-shrink-0">
+                                <div class="mini-score">{{ "%.1f"|format(tp.overall_score) }}</div>
+                                <small class="text-muted">/ 10</small>
+                            </div>
                         </div>
-                        <div class="text-end ms-2 flex-shrink-0">
-                            <div class="mini-score">{{ "%.1f"|format(tp.overall_score) }}</div>
-                            <small class="text-muted">/ 10</small>
+                        <div class="score-summary mt-1">
+                            🎯{{ "%.1f"|format(tp.difficulty_score) }} &nbsp;📍{{ "%.1f"|format(tp.region_score) }} &nbsp;💰{{ "%.1f"|format(tp.salary_score) }} &nbsp;📈{{ "%.1f"|format(tp.prospect_score) }}
                         </div>
+                        <div id="mini-radar-{{ tp.id }}" style="height: 160px; margin-top: 0.25rem;"></div>
+                        <a href="/position/{{ tp.id }}" class="btn btn-sm btn-outline-custom w-100 mt-2">
+                            查看详情 <i class="bi bi-arrow-right"></i>
+                        </a>
                     </div>
-                    <div class="score-summary mt-1">
-                        🎯{{ "%.1f"|format(tp.difficulty_score) }} &nbsp;📍{{ "%.1f"|format(tp.region_score) }} &nbsp;💰{{ "%.1f"|format(tp.salary_score) }} &nbsp;📈{{ "%.1f"|format(tp.prospect_score) }}
-                    </div>
-                    <div id="mini-radar-{{ tp.id }}" style="height: 160px; margin-top: 0.25rem;"></div>
-                    <a href="/position/{{ tp.id }}" class="btn btn-sm btn-outline-custom w-100 mt-2">
-                        查看详情 <i class="bi bi-arrow-right"></i>
-                    </a>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
+    {% endif %}
 </div>
-{% endif %}
 
-<!-- Quick Stats Table -->
-<div class="container mt-5">
-    <div class="row g-4">
-        <div class="col-lg-6">
-            <div class="card fade-in-up">
-                <div class="card-header">
-                    <i class="bi bi-trophy"></i> 🔥 招录人数最多 TOP5
-                </div>
-                <div class="card-body p-0">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>招录机关</th>
-                                <th>地市</th>
-                                <th>招录人数</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for p in stats.hardest %}
-                            <tr>
-                                <td class="text-truncate" style="max-width:200px">{{ p.unit }}</td>
-                                <td>{{ p.city }}</td>
-                                <td><strong style="color:var(--primary)">{{ p.recruit_num }}人</strong></td>
-                                <td><a href="/position/{{ p.id }}" class="btn btn-sm btn-outline-primary">详情</a></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+<!-- 学员意向登记 -->
+<div id="lead-form" class="container mt-5 mb-5">
+    <div class="lead-form-section">
+        <h3 class="mb-1"><i class="bi bi-pencil-square"></i> 免费获取选岗方案</h3>
+        <p class="mb-4" style="opacity:0.85;">填写信息，我们将在24小时内与您联系，提供专属选岗建议</p>
+        <form id="leadForm" class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label text-white fw-bold">姓名</label>
+                <input type="text" class="form-control" name="name" placeholder="您的姓名" required>
             </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card fade-in-up">
-                <div class="card-header">
-                    <i class="bi bi-emoji-smile"></i> 🍀 单岗招录最少 TOP5
-                </div>
-                <div class="card-body p-0">
-                    <table class="table table-hover mb-0">
-                        <thead>
-                            <tr>
-                                <th>招录机关</th>
-                                <th>地市</th>
-                                <th>招录人数</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for p in stats.easiest %}
-                            <tr>
-                                <td class="text-truncate" style="max-width:200px">{{ p.unit }}</td>
-                                <td>{{ p.city }}</td>
-                                <td>{{ p.recruit_num }}人</td>
-                                <td><a href="/position/{{ p.id }}" class="btn btn-sm btn-outline-primary">详情</a></td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="col-md-6">
+                <label class="form-label text-white fw-bold">电话</label>
+                <input type="tel" class="form-control" name="phone" placeholder="手机号码" required>
             </div>
+            <div class="col-md-6">
+                <label class="form-label text-white fw-bold">意向地市</label>
+                <select class="form-select" name="city">
+                    <option value="">请选择地市</option>
+                    <option>郑州</option><option>开封</option><option>洛阳</option>
+                    <option>平顶山</option><option>安阳</option><option>鹤壁</option>
+                    <option>新乡</option><option>焦作</option><option>濮阳</option>
+                    <option>许昌</option><option>漯河</option><option>三门峡</option>
+                    <option>南阳</option><option>商丘</option><option>信阳</option>
+                    <option>周口</option><option>驻马店</option><option>济源</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label text-white fw-bold">意向岗位</label>
+                <input type="text" class="form-control" name="position_type" placeholder="如：公安、乡镇、财会...">
+            </div>
+            <div class="col-12 text-center mt-3">
+                <button type="submit" class="btn btn-submit">
+                    提交咨询 🚀
+                </button>
+            </div>
+            <div class="col-12 text-center mt-2">
+                <small style="opacity:0.8;">💬 或直接联系我们：微信 haofeng-gwy</small>
+            </div>
+        </form>
+        <div id="leadSuccess" class="text-center mt-4" style="display:none;">
+            <div style="font-size:3rem;">✅</div>
+            <h4>已收到您的咨询！</h4>
+            <p>我们将在24小时内与您联系，请保持手机畅通。</p>
         </div>
     </div>
 </div>
@@ -253,25 +231,8 @@
 
 {% block extra_scripts %}
 <script>
-// 城市多选
-document.querySelectorAll('.city-pill').forEach(pill => {
-    pill.addEventListener('click', function() {
-        this.classList.toggle('active');
-        updateCityInput();
-    });
-});
-function updateCityInput() {
-    const selected = [];
-    document.querySelectorAll('.city-pill.active').forEach(p => selected.push(p.dataset.city));
-    document.getElementById('citiesInput').value = selected.join(',');
-}
-
-// 初始化图表
+// 初始化推荐岗位雷达图
 document.addEventListener('DOMContentLoaded', function() {
-    initCitiesBarChart('chart-cities', {{ stats.by_city | tojson }});
-    initYearTrendChart('chart-year-trend', {{ stats.by_year | tojson }});
-    initSystemPieChart('chart-system', {{ stats.by_system | tojson }});
-    initEduPieChart('chart-edu', {{ stats.by_edu | tojson }});
     {% for tp in stats.top_positions %}
     initMiniRadarChart('mini-radar-{{ tp.id }}', {
         difficulty_score: {{ tp.difficulty_score }},
@@ -281,5 +242,42 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     {% endfor %}
 });
+
+// 学员登记表单 AJAX 提交
+(function() {
+    const form = document.getElementById('leadForm');
+    if (!form) return;
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        var fd = new FormData(form);
+        var data = {};
+        fd.forEach(function(v, k) { data[k] = v; });
+        var btn = form.querySelector('.btn-submit');
+        btn.disabled = true;
+        btn.textContent = '提交中...';
+
+        fetch('/api/lead', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(data)
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            if (d.status === 'ok') {
+                form.style.display = 'none';
+                document.getElementById('leadSuccess').style.display = 'block';
+            } else {
+                alert(d.message || '提交失败，请重试');
+                btn.disabled = false;
+                btn.textContent = '提交咨询 🚀';
+            }
+        })
+        .catch(function() {
+            alert('网络错误，请稍后重试');
+            btn.disabled = false;
+            btn.textContent = '提交咨询 🚀';
+        });
+    });
+})();
 </script>
 {% endblock %}
